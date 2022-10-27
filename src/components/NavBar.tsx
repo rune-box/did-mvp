@@ -22,7 +22,7 @@ import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 // import { ColorModeSwitcher } from '../ColorModeSwitcher';
 import { Logo } from '../icons/Logo';
 import { ethers } from 'ethers';
-import { EmptyDNA, ViewData, ViewMdoelBridge } from '../client/ViewData';
+import { EmptyCids, EmptyDNA, ViewData, ViewMdoelBridge } from '../client/ViewData';
 // import { CeramicContext } from '../client/CeramicContext';
 // import { EthereumAuthProvider, useViewerConnection } from '@self.id/framework';
 import { DotbitContext } from '../client/DotbitContext';
@@ -153,6 +153,8 @@ export const NavBar = () => {
     //disconnect();
     ViewData.eth = "";
     setCurrentAccount("");
+    ViewMdoelBridge.DNA = EmptyDNA;
+    ViewMdoelBridge.Cids = EmptyCids;
     //cxtCeramic.selfid = null;
     // toast({
     //   title: 'Disconnected!',

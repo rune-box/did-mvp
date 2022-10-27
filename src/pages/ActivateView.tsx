@@ -8,6 +8,7 @@ import { ActivationsRules_DAOSquare, ActivationsRules_Goodghosting } from "../cl
 import { RoutesData } from "../client/RoutesData";
 import { RunesData } from "../client/RunesData";
 import { EmptyDNA, ViewData, ViewMdoelBridge } from "../client/ViewData";
+import { buildCheckIdenaContent } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { APIs, AuthAPIs } from "../services/APIs";
@@ -29,12 +30,13 @@ export const ActivateView = () => {
     const [daoSquareIsOK, setDaoSquareIsOK] = React.useState(false);
     const [checkingGoodghosting, setCheckingGoodghosting] = React.useState(false);
     const [goodghostingIsOK, setGoodghostingIsOK] = React.useState(false);
+    const [checkingIdena, setCheckingIdena] = React.useState(false);
     const [idenaIsHuman, setIdenaIsHuman] = React.useState(false);
     const [assets1000, setAssets1000] = React.useState(false);
     const [assets10000, setAssets10000] = React.useState(false);
 
-    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop(Utility.generatePlainUUID());
-    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web(Utility.generatePlainUUID());
+    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop_TEST(Utility.generatePlainUUID(), ViewData.eth);
+    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web_TEST(Utility.generatePlainUUID(), ViewData.eth);
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -70,6 +72,48 @@ export const ActivateView = () => {
         }
         finally{
             setCheckingGoodghosting(false);
+        }
+    };
+    const checkIdena = async () => {
+        setCheckingIdena(true);
+
+        const message = buildCheckIdenaContent();
+        const ethereum = (window as any).ethereum;
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner(ViewData.eth);
+        const signature = await signer.signMessage(message);
+        try{
+            const res1 = await axios.post(APIs.CheckIdena, {
+                message: message,
+                signature: signature
+            });
+            const data1 = res1.data;
+            //console.log(data1);
+            if(data1 && data1.success === true){
+                toast({
+                    title: 'Idena Auth',
+                    description: "Authenticated!",
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                ViewMdoelBridge.DNA.genes.crypto.idena = data1.account;
+                console.log("Idena account: " + ViewMdoelBridge.DNA.genes.crypto.idena);
+                setIdenaIsHuman(data1.human);
+                if(holdDid && data1.human) setIsEligible(true);
+            }
+            else{
+                toast({
+                    title: 'Idena Auth',
+                    description: "Failed!",
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        }
+        finally{
+            setCheckingIdena(false);
         }
     };
     const activate = async () => {
@@ -110,14 +154,23 @@ export const ActivateView = () => {
                     duration: 3000,
                     isClosable: true,
                 });
+                await delay(1234);
                 toast({
                     title: 'Preparing for Step 2',
                     description: "❤ Be patient! ❤",
                     status: 'info',
-                    duration: 3000,
+                    duration: 2000,
                     isClosable: true,
                 });
-                await delay(3100);
+                await delay(2048);
+                toast({
+                    title: 'Still Preparing for Step 2',
+                    description: "❤ Be patient! ❤",
+                    status: 'info',
+                    duration: 2000,
+                    isClosable: true,
+                });
+                await delay(2048);
                 // step 2
                 const res2 = await axios.get(APIs.Save + "?account=" + ViewData.eth);
                 let data2 = res2.data;
@@ -130,11 +183,8 @@ export const ActivateView = () => {
                         duration: 3000,
                         isClosable: true,
                     });
-                    const dna = data2.data;
-                    // DNA.id = dna.id;
-                    // DNA.hash = dna.hash;
-                    // DNA.lastDna = dna.lastDna;
-                    ViewMdoelBridge.DNA = dna;
+                    ViewMdoelBridge.DNA = data2.dna;
+                    ViewMdoelBridge.Cids= data2.cids;
                     console.log(ViewMdoelBridge.DNA);
                     ViewData.activated = true;
                     ViewData.afterActivated();
@@ -214,7 +264,8 @@ export const ActivateView = () => {
                                     <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaWeb} target="_blank">Web App</MenuItem>
                                 </MenuList>
                             </Menu>
-                            <Button size='xs' leftIcon={<RepeatIcon/>}>Check Result</Button>
+                            <Button size='xs' leftIcon={<RepeatIcon/>} onClick={checkIdena}
+                                isLoading={checkingIdena}>Check Result</Button>
                         </HStack>
                     </Box>
                 </WrapItem>

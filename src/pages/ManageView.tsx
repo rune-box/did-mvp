@@ -19,8 +19,8 @@ export const ManageView = () => {
     const record = useViewerRecord("cryptoAccounts");
     
 
-    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop(Utility.generatePlainUUID());
-    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web(Utility.generatePlainUUID());
+    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop(Utility.generatePlainUUID(), ViewData.eth);
+    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web(Utility.generatePlainUUID(), ViewData.eth);
     //const cxtCeramic: CeramicContext = ViewData.ceramicContext;
 
     const namespace = "runebox";

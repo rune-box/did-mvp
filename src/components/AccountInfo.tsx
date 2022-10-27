@@ -89,12 +89,22 @@ export const AccountInfo = () => {
             );
         }
     }
+    const renderIdena = () => {
+        const idena = ViewMdoelBridge.DNA.genes.crypto.idena;
+        if(idena && idena.length > 10)
+        return (
+            <WrapItem padding="10px">
+                <QrcodeCard data={idena} title="Idena" />
+            </WrapItem>
+        );
+    }
 
     return (
         <Wrap spacing="20px">
             {renderDotbit()}
             {renderENS()}
             {renderETH()}
+            {renderIdena()}
             <SnapshotCard />
         </Wrap>
     );
