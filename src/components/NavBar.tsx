@@ -17,6 +17,8 @@ import {
   Avatar,
   MenuList,
   MenuItem,
+  SimpleGrid,
+  Center,
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 // import { ColorModeSwitcher } from '../ColorModeSwitcher';
@@ -31,6 +33,7 @@ import { RoutesData } from '../client/RoutesData';
 import { buildSignContent } from '../client/Wallet';
 import axios from 'axios';
 import { APIs } from '../services/APIs';
+import { AppSettings } from '../client/AppData';
 
 export const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();

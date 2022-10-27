@@ -1,4 +1,6 @@
-const APIPrefix_Runebox = "https://localhost:7153/v0/"; //"https://api.runebox.xyz/v0/"; // 
+import { AppSettings } from "../client/AppData";
+
+const APIPrefix_Runebox = AppSettings.APIPrefix; //"https://localhost:7153/v0/"; //"https://api.runebox.xyz/v0/"; // 
 const queryPart = "&address=";
 
 export const APIs = {

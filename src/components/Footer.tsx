@@ -1,4 +1,5 @@
 import { Box, ButtonGroup, Flex, Heading, Spacer, Image, Grid, GridItem, VStack, Link, HStack, Divider, Text } from "@chakra-ui/react";
+import { AppSettings } from "../client/AppData";
 
 export const Footer = ()=>{
     return (
@@ -14,6 +15,9 @@ export const Footer = ()=>{
                 <Text>of</Text> */}
                 {/* <Link textDecoration="none" href="https://ceramic.network/">Ceramic</Link>
                 <Text color="red">TESTNET</Text> */}
+                <Text color="red" fontWeight="bold">Stage: Chaos</Text>
+                <Text> (Data maybe reset)</Text>
+                <Text color='gray'>API endpoint: {AppSettings.APIPrefix}</Text>
             </HStack>
         </Box>
     );

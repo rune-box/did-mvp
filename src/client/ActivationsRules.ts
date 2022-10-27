@@ -110,6 +110,10 @@ export const ActivationsRules_DAOSquare = {
     "schemaVersion": 0
 };
 
+export const ActivationsRules_Debank = {
+    // 
+};
+
 export const ActivationsRules_Goodghosting = {
     "title": "BAB+Goodghosting",
     "description": "",
