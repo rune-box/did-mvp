@@ -1,0 +1,1 @@
+export const delay = (milleseconds: number) => new Promise(res => setTimeout(res, milleseconds));
