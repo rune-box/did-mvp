@@ -4,9 +4,9 @@ import { DIDBase } from "./DIDBase";
 
 export class ENSContext extends DIDBase{
     provider: Web3Provider;
-    constructor(){
+    constructor(provider: ethers.providers.Web3Provider | null){
         super();
-        this.provider = new ethers.providers.Web3Provider((window as any).ethereum);
+        this.provider = provider ?? new ethers.providers.Web3Provider((window as any).ethereum);
     }
 
     async useAddress(address: string){

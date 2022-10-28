@@ -61,6 +61,15 @@ export const ActivateView = () => {
             //if(ok && holdDid) setIsEligible(true);
             return ok;
         }
+        catch(e){
+            toast({
+                title: 'Failed',
+                description: "Unknown error while checking DAOSquare",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        }
         finally{
             setCheckingDAOSquare(false);
         }
@@ -75,6 +84,15 @@ export const ActivateView = () => {
             // setHoldBAB(bab);
             // if(ok && bab && holdDid) setIsEligible(true);
             return ok;
+        }
+        catch(e){
+            toast({
+                title: 'Failed',
+                description: "Unknown error while checking Debank",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
         }
         finally{
             setCheckingDebank(false);
@@ -91,22 +109,21 @@ export const ActivateView = () => {
             // if(ok && bab && holdDid) setIsEligible(true);
             return ok;
         }
+        catch(e){
+            toast({
+                title: 'Failed',
+                description: "Unknown error while checking Goodghosting",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        }
         finally{
             setCheckingGoodghosting(false);
         }
     };
     
     const checkIdena = async () => {
-        // if(!holdDid) {
-        //     toast({
-        //         title: 'NO DID!',
-        //         description: "You should register a DID (.bit/.eth) first...",
-        //         status: 'error',
-        //         duration: 3000,
-        //         isClosable: true,
-        //     });
-        //     return;
-        // }
         setCheckingIdena(true);
 
         const message = buildCheckIdenaContent();

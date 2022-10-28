@@ -30,7 +30,7 @@ import { EmptyCids, EmptyDNA, ViewData, ViewMdoelBridge } from '../client/ViewDa
 import { DotbitContext } from '../client/DotbitContext';
 import { ENSContext } from '../client/ENSContext';
 import { RoutesData } from '../client/RoutesData';
-import { buildSignContent } from '../client/Wallet';
+import { buildSignContent, requestETHNetwork } from '../client/Wallet';
 import axios from 'axios';
 import { APIs } from '../services/APIs';
 import { AppSettings } from '../client/AppData';
@@ -45,18 +45,18 @@ export const NavBar = () => {
   const navigate = useNavigate();
   //const cxtCeramic: CeramicContext = ViewData.ceramicContext;
 
-  const getDIDs = async () => {
+  const getDIDs = async (provider: ethers.providers.Web3Provider) => {
     const cxtDotbit = new DotbitContext();
     await cxtDotbit.useAddress(ViewData.eth);
     ViewData.did.dotbit = cxtDotbit.did;
     ViewMdoelBridge.DotbitContext = cxtDotbit;
     
-    const cxtEns = new ENSContext();
+    const cxtEns = new ENSContext(provider);
     await cxtEns.useAddress(ViewData.eth);
     ViewData.did.ens = cxtEns.did;
     ViewMdoelBridge.ENSContext = cxtEns;
 
-    ViewData.displayName = cxtEns.did || cxtDotbit.did || "";
+    ViewData.displayName = cxtDotbit.did || cxtEns.did || "";
     setDisplayName(ViewData.displayName);
     
     //console.log("DIDs:" + ViewData.displayName);
@@ -111,11 +111,22 @@ export const NavBar = () => {
       });
       return;
     }
+    const ethNetwork = await requestETHNetwork(ethereum);
+    if(ethNetwork){ // null = success
+      toast({
+        title: 'The ENS function needs ETH mainnet',
+        description: "Please switch to Ethereum Mainnet.",
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
     const accounts = await ethereum.request({method: "eth_requestAccounts"});
     const account = accounts[0];
     const msgContent = buildSignContent(account);
 
-    const provider = new ethers.providers.Web3Provider(ethereum)
+    const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner(account);
 
     const signature = await signer.signMessage(msgContent);
@@ -133,7 +144,7 @@ export const NavBar = () => {
       setCurrentAccount(ViewData.eth);
       
       console.log("Connected to: " + data.account);
-      await getDIDs();
+      await getDIDs(provider);
       ViewData.loggedIn = true;
       toast({
         title: 'Connected!',

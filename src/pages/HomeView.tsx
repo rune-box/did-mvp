@@ -13,37 +13,37 @@ import { Footer } from "../components/Footer"
 import { loadAppData, resetAppData } from "../client/AppData"
 
 export const HomeView = () => {
-    const param = loadAppData();
+  const param = loadAppData();
   const [did, setDID] = React.useState(param);
   const [evmAddress, setEvmAddress] = React.useState('');
   const [idenaAddress, setIdenaAddress] = React.useState('');
 
-  const ctxEns = new ENSContext();
+  const ctxEns = new ENSContext(null);
   const ctxDotbit = new DotbitContext();
   const processDid = (newid: string) => {
-    if(newid && newid.length > 4){
+    if (newid && newid.length > 4) {
       const lower = newid.toLocaleLowerCase();
-      if(lower.endsWith(".eth")){
+      if (lower.endsWith(".eth")) {
         ctxEns.useDid(newid).then(() => {
           setEvmAddress(ctxEns.evmAddress);
         });
       }
-      else if(lower.endsWith(".bit")){
+      else if (lower.endsWith(".bit")) {
         ctxDotbit.useDid(newid).then(() => {
           setEvmAddress(ctxDotbit.evmAddress);
         });
       }
-      else{
+      else {
         setEvmAddress("");
       }
     }
-    else{
+    else {
       resetAppData();
       setEvmAddress("");
     }
   }
 
-  if(param) processDid(param);
+  if (param) processDid(param);
 
   return (
     <VStack spacing={4}>
@@ -55,17 +55,17 @@ export const HomeView = () => {
             setDID(e.target.value);
             processDid(e.target.value);
           }
-        }/>
+          } />
       </InputGroup>
       <InputGroup>
         <InputLeftAddon children="ETH" />
         <Input type="text" placeholder="Address: 0x..."
-          value={evmAddress} onChange={(e) => {setEvmAddress(e.target.value);} }/>
+          value={evmAddress} onChange={(e) => { setEvmAddress(e.target.value); }} />
       </InputGroup>
       <InputGroup>
         <InputLeftAddon children="Idena" />
         <Input type="text" placeholder="Address: 0x..."
-          value={idenaAddress} onChange={(e) => {setIdenaAddress(e.target.value);} }/>
+          value={idenaAddress} onChange={(e) => { setIdenaAddress(e.target.value); }} />
       </InputGroup>
       <CardsRenderer evmAddress={evmAddress} idenaAddress={idenaAddress} />
       <Footer />

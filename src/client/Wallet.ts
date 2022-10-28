@@ -18,3 +18,13 @@ export const buildCheckIdenaContent = () => {
     };
     return JSON.stringify(data);
 }
+
+export const requestETHNetwork = async (ethereum: any) => {
+    const result = await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{
+            chainId: "0x1"
+        }]
+    });
+    return result;
+}
