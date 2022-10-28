@@ -142,7 +142,7 @@ export const NavBar = () => {
         duration: 3000,
         isClosable: true,
       });
-      if(data.dna && data.dna.id.length > 1){
+      if(data.dna && data.dna.id.length > 1){ // activated
         ViewMdoelBridge.DNA = data.dna;
         ViewMdoelBridge.Cids = data.cids;
         ViewData.activated = true;
@@ -150,13 +150,20 @@ export const NavBar = () => {
         ViewData.afterLoggedIn();
         navigate(RoutesData.Profile);
       }
+      else{
+        ViewData.afterLoggedIn();
+        navigate(RoutesData.Activate);
+      }
     }
   };
 
   const tryDisConnect = async () => {
     //disconnect();
     ViewData.eth = "";
+    ViewData.displayName = "";
+    ViewData.did = {dotbit: "", ens: ""};
     ViewData.loggedIn = false;
+    ViewData.activated = false;
     setCurrentAccount("");
     ViewMdoelBridge.DNA = EmptyDNA;
     ViewMdoelBridge.Cids = EmptyCids;
