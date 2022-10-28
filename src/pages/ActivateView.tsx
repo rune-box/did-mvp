@@ -39,8 +39,8 @@ export const ActivateView = () => {
     const [assets1000, setAssets1000] = React.useState(false);
     const [assets10000, setAssets10000] = React.useState(false);
 
-    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop_TEST(Utility.generatePlainUUID(), ViewData.eth);
-    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web_TEST(Utility.generatePlainUUID(), ViewData.eth);
+    const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop(Utility.generatePlainUUID(), ViewData.eth);
+    const uriIdenaWeb = AuthAPIs.getUri_Idena_Web(Utility.generatePlainUUID(), ViewData.eth);
     const toast = useToast();
     const navigate = useNavigate();
 
@@ -97,6 +97,16 @@ export const ActivateView = () => {
     };
     
     const checkIdena = async () => {
+        if(!holdDid) {
+            toast({
+                title: 'NO DID!',
+                description: "You should register a DID (.bit/.eth) first...",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
         setCheckingIdena(true);
 
         const message = buildCheckIdenaContent();
@@ -240,7 +250,16 @@ export const ActivateView = () => {
     }
 
     const checkEligibility = async () => {
-        if(!holdDid) return;
+        if(!holdDid) {
+            toast({
+                title: 'NO DID!',
+                description: "You should register a DID (.bit/.eth) first...",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
         if(holdSameDids && holdBAB){
             setIsEligible(true);
             return;
@@ -253,7 +272,16 @@ export const ActivateView = () => {
         }
 
         // need bab
-        if(!holdBAB) return;
+        if(!holdBAB) {
+            toast({
+                title: 'NO BAB!',
+                description: "You should register a BAB first...",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+            return;
+        }
 
         await checkDebank();
         if(debankIsOK) {

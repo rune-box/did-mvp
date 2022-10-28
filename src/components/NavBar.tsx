@@ -59,7 +59,7 @@ export const NavBar = () => {
     ViewData.displayName = cxtEns.did || cxtDotbit.did || "";
     setDisplayName(ViewData.displayName);
     
-    console.log("DIDs:" + ViewData.displayName);
+    //console.log("DIDs:" + ViewData.displayName);
     console.log(ViewData.did);
   };
 
