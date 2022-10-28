@@ -97,16 +97,16 @@ export const ActivateView = () => {
     };
     
     const checkIdena = async () => {
-        if(!holdDid) {
-            toast({
-                title: 'NO DID!',
-                description: "You should register a DID (.bit/.eth) first...",
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
+        // if(!holdDid) {
+        //     toast({
+        //         title: 'NO DID!',
+        //         description: "You should register a DID (.bit/.eth) first...",
+        //         status: 'error',
+        //         duration: 3000,
+        //         isClosable: true,
+        //     });
+        //     return;
+        // }
         setCheckingIdena(true);
 
         const message = buildCheckIdenaContent();
@@ -132,7 +132,8 @@ export const ActivateView = () => {
                 ViewMdoelBridge.DNA.genes.crypto.idena = data1.account;
                 console.log("Idena account: " + ViewMdoelBridge.DNA.genes.crypto.idena);
                 setIdenaIsHuman(data1.human);
-                if(holdDid && data1.human) setIsEligible(true);
+                //holdDid && 
+                if(data1.human) setIsEligible(true);
             }
             else{
                 toast({
@@ -260,7 +261,7 @@ export const ActivateView = () => {
             });
             return;
         }
-        if(holdSameDids && holdBAB){
+        if(holdSameDids){
             setIsEligible(true);
             return;
         }
@@ -317,13 +318,13 @@ export const ActivateView = () => {
             <Wrap spacing="30px">
                 <WrapItem padding="30px">
                     <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>DID + Idena</Heading>
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>Idena</Heading>
                         <Divider />
                         <List padding={3} h='200px'>
-                            <ListItem>
+                            {/* <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold a DID (.eth or .bit)
-                            </ListItem>
+                            </ListItem> */}
                             <ListItem>
                                 {renderCheckIcon(idenaIsHuman)}
                                 Hold a Idena account: <Code>Human</Code>
@@ -362,7 +363,7 @@ export const ActivateView = () => {
                 </WrapItem>
                 <WrapItem padding="30px">
                     <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>Same DIDs + BAB</Heading>
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>Same DIDs</Heading>
                         <Divider />
                         <List padding={3}>
                             <ListItem>
@@ -373,10 +374,10 @@ export const ActivateView = () => {
                                 {renderCheckIcon(holdSameDids)}
                                 .eth == .bit
                             </ListItem>
-                            <ListItem>
+                            {/* <ListItem>
                                 {renderCheckIcon(holdBAB)}
                                 Hold a BAB token
-                            </ListItem>
+                            </ListItem> */}
                         </List>
                         <CircularProgress isIndeterminate visibility={checkingDebank ? "visible" : "hidden"} />
                     </Box>
@@ -396,7 +397,7 @@ export const ActivateView = () => {
                             </ListItem>
                             <ListItem>
                                 {renderCheckIcon(debankIsOK)}
-                                Debank score is greater than <Code>4.2</Code>
+                                Debank score is greater than <Code>4.2069</Code>
                             </ListItem>
                         </List>
                         <CircularProgress isIndeterminate visibility={checkingDebank ? "visible" : "hidden"} />

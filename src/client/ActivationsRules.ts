@@ -143,7 +143,7 @@ export const ActivationsRules_Debank = {
                 {
                     "id": "6b9e45cdbdcf4d09b06ed53d67c4f92f",
                     "leftCondition": "(",
-                    "leftValue": 42,
+                    "leftValue": 4.2069,
                     "condition": "",
                     "rightCondition": "]",
                     "rightValue": 100,
@@ -155,7 +155,7 @@ export const ActivationsRules_Debank = {
                     "leftValue": 0,
                     "condition": "",
                     "rightCondition": "]",
-                    "rightValue": 42,
+                    "rightValue": 4.2069,
                     "score": 0
                 }
             ],
