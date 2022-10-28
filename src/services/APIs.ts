@@ -8,127 +8,128 @@ export const APIs = {
     CheckIdena: "/connect/check-idena",
     ActivateEvm: "/dna/activate-evm",
     Mutate: "/dna/mutate",
-    Save: "/dna/save"
+    Save: "/dna/save",
+    RefreshCIDs: "/dna/refresh-cids-by-eth"
 };
 
 export const APIsData = {
     evm: [
-        {
-            "id": "e2bcbdfac5ca45ccb57cf0c030a1acdc",
-            "title": "Discord is verified - Galxe",
-            "description": "",
-            "dataType": "boolean",
-            "apis": [
-                {
-                    "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=e2bcbdfac5ca45ccb57cf0c030a1acdc" + queryPart,
-                    "provider": "Galxe",
-                    "lastPingAt": 0
-                }
-            ],
-            "isTask": false,
-            "possibleValues": [
+        // {
+        //     "id": "e2bcbdfac5ca45ccb57cf0c030a1acdc",
+        //     "title": "Discord is verified - Galxe",
+        //     "description": "",
+        //     "dataType": "boolean",
+        //     "apis": [
+        //         {
+        //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=e2bcbdfac5ca45ccb57cf0c030a1acdc" + queryPart,
+        //             "provider": "Galxe",
+        //             "lastPingAt": 0
+        //         }
+        //     ],
+        //     "isTask": false,
+        //     "possibleValues": [
                 
-            ],
-            "keywords": [
-                "discord is verified",
-                "galxe",
-                "galaxy"
-            ],
-            "schemaVersion": 0
-        },
-        {
-            "id": "95b868a0799b4cb5995714d74a025024",
-            "title": "Github is verified - Galxe",
-            "description": "",
-            "dataType": "boolean",
-            "apis": [
-                {
-                    "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=95b868a0799b4cb5995714d74a025024" + queryPart,
-                    "provider": "Galxe",
-                    "lastPingAt": 0
-                }
-            ],
-            "isTask": false,
-            "possibleValues": [
+        //     ],
+        //     "keywords": [
+        //         "discord is verified",
+        //         "galxe",
+        //         "galaxy"
+        //     ],
+        //     "schemaVersion": 0
+        // },
+        // {
+        //     "id": "95b868a0799b4cb5995714d74a025024",
+        //     "title": "Github is verified - Galxe",
+        //     "description": "",
+        //     "dataType": "boolean",
+        //     "apis": [
+        //         {
+        //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=95b868a0799b4cb5995714d74a025024" + queryPart,
+        //             "provider": "Galxe",
+        //             "lastPingAt": 0
+        //         }
+        //     ],
+        //     "isTask": false,
+        //     "possibleValues": [
                 
-            ],
-            "keywords": [
-                "galxe",
-                "github is verified",
-                "galaxy"
-            ],
-            "schemaVersion": 0
-        },
-        {
-            "id": "21f24a2edbe849e5a9303ca9e7f4abcc",
-            "title": "Twitter is verified - Galxe",
-            "description": "",
-            "dataType": "boolean",
-            "apis": [
-                {
-                    "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=21f24a2edbe849e5a9303ca9e7f4abcc" + queryPart,
-                    "provider": "Galxe",
-                    "lastPingAt": 0
-                }
-            ],
-            "isTask": false,
-            "possibleValues": [
+        //     ],
+        //     "keywords": [
+        //         "galxe",
+        //         "github is verified",
+        //         "galaxy"
+        //     ],
+        //     "schemaVersion": 0
+        // },
+        // {
+        //     "id": "21f24a2edbe849e5a9303ca9e7f4abcc",
+        //     "title": "Twitter is verified - Galxe",
+        //     "description": "",
+        //     "dataType": "boolean",
+        //     "apis": [
+        //         {
+        //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=21f24a2edbe849e5a9303ca9e7f4abcc" + queryPart,
+        //             "provider": "Galxe",
+        //             "lastPingAt": 0
+        //         }
+        //     ],
+        //     "isTask": false,
+        //     "possibleValues": [
                 
-            ],
-            "keywords": [
-                "twitter is verified",
-                "galxe",
-                "galaxy"
-            ],
-            "schemaVersion": 0
-        },
-        {
-            "id": "3e864bd2f55447739274e16c476f0e3e",
-            "title": "Email is verified - Galxe",
-            "description": "",
-            "dataType": "boolean",
-            "apis": [
-                {
-                    "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=3e864bd2f55447739274e16c476f0e3e" + queryPart,
-                    "provider": "Galxe",
-                    "lastPingAt": 0
-                }
-            ],
-            "isTask": false,
-            "possibleValues": [
+        //     ],
+        //     "keywords": [
+        //         "twitter is verified",
+        //         "galxe",
+        //         "galaxy"
+        //     ],
+        //     "schemaVersion": 0
+        // },
+        // {
+        //     "id": "3e864bd2f55447739274e16c476f0e3e",
+        //     "title": "Email is verified - Galxe",
+        //     "description": "",
+        //     "dataType": "boolean",
+        //     "apis": [
+        //         {
+        //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=3e864bd2f55447739274e16c476f0e3e" + queryPart,
+        //             "provider": "Galxe",
+        //             "lastPingAt": 0
+        //         }
+        //     ],
+        //     "isTask": false,
+        //     "possibleValues": [
                 
-            ],
-            "keywords": [
-                "email is verified",
-                "galxe",
-                "galaxy"
-            ],
-            "schemaVersion": 0
-        },
-        {
-            "id": "07a36eec52dc438799efefd42bacc10a",
-            "title": "Galxe ID",
-            "description": "",
-            "dataType": "text",
-            "apis": [
-                {
-                    "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=" + queryPart,
-                    "provider": "Galxe",
-                    "lastPingAt": 0
-                }
-            ],
-            "isTask": false,
-            "possibleValues": [
+        //     ],
+        //     "keywords": [
+        //         "email is verified",
+        //         "galxe",
+        //         "galaxy"
+        //     ],
+        //     "schemaVersion": 0
+        // },
+        // {
+        //     "id": "07a36eec52dc438799efefd42bacc10a",
+        //     "title": "Galxe ID",
+        //     "description": "",
+        //     "dataType": "text",
+        //     "apis": [
+        //         {
+        //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=" + queryPart,
+        //             "provider": "Galxe",
+        //             "lastPingAt": 0
+        //         }
+        //     ],
+        //     "isTask": false,
+        //     "possibleValues": [
                 
-            ],
-            "keywords": [
-                "galxe",
-                "id",
-                "account",
-                "galaxy"
-            ],
-            "schemaVersion": 0
-        },
+        //     ],
+        //     "keywords": [
+        //         "galxe",
+        //         "id",
+        //         "account",
+        //         "galaxy"
+        //     ],
+        //     "schemaVersion": 0
+        // },
         {
             "id": "3a09559978574ecdb29380b0309752f1",
             "title": "Score on EthRank",

@@ -1,7 +1,10 @@
-import { ExternalLinkIcon } from "@chakra-ui/icons";
-import { Avatar, Box, Center, Link, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { ExternalLinkIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Avatar, Box, Center, IconButton, Link, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
+import React from "react";
 import { ViewData, ViewMdoelBridge } from "../client/ViewData";
+import { APIs } from "../services/APIs";
 
 type QrcodeCardProps = {
     data: string;
@@ -39,8 +42,43 @@ export const AvatarCard = ({did, avatar}: AvatarCardProps) => {
 }
 
 export const SnapshotCard = () => {
+    const [canRefresh, setCanRefresh] = React.useState(!ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10);
+    const [refreshing, setRefreshing] = React.useState(false);
+    const toast = useToast();
+    
     const arweave = `https://arweave.net/${ViewMdoelBridge.Cids.arweave}`;
     const ipfs = `https://${ViewMdoelBridge.Cids.ipfs}.ipfs.4everland.io/`;
+    const refreshCids = async () => {
+        try{
+            setRefreshing(true);
+            const res1 = await axios.get(APIs.RefreshCIDs + "?eth=" + ViewData.eth);
+            const data1 = res1.data;
+            //console.log(data1);
+            if(data1 && data1.success === true){
+                toast({
+                    title: 'Refresh CIDs...',
+                    description: "Success!",
+                    status: 'success',
+                    duration: 2000,
+                    isClosable: true,
+                });
+                ViewMdoelBridge.Cids = data1.cids;
+                setCanRefresh(false);
+            }
+            else{
+                toast({
+                    title: 'Refresh CIDs...',
+                    description: "Failed!",
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        }
+        finally{
+            setRefreshing(false);
+        }
+    };
     return (
         <WrapItem padding="10px">
             <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
@@ -52,6 +90,13 @@ export const SnapshotCard = () => {
                 </Center>
                 <Center mt={5}>
                     <Link target="_blank" href={ipfs}>IPFS <ExternalLinkIcon mx='2px' /></Link>
+                </Center>
+                <Center mt={5} visibility={canRefresh ? "visible" : "hidden"}>
+                    <IconButton icon={<RepeatIcon />} onClick={refreshCids}
+                        isLoading={refreshing} aria-label="Refreshing" />
+                </Center>
+                <Center visibility={canRefresh ? "visible" : "hidden"}>
+                    <Text color="gray" m={5}>If you see a REFRESH button, click to fetch the newest Arweave hash.</Text>
                 </Center>
             </Box>
         </WrapItem>

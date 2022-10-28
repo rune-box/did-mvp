@@ -56,7 +56,7 @@ export const NavBar = () => {
     ViewData.did.ens = cxtEns.did;
     ViewMdoelBridge.ENSContext = cxtEns;
 
-    ViewData.displayName = cxtDotbit.did || cxtEns.did || "";
+    ViewData.displayName = cxtEns.did || cxtDotbit.did || "";
     setDisplayName(ViewData.displayName);
     
     console.log("DIDs:" + ViewData.displayName);
@@ -115,16 +115,12 @@ export const NavBar = () => {
     const account = accounts[0];
     const msgContent = buildSignContent(account);
 
-    if(ViewData.eth !== account){
-      ViewData.eth = account;
-      setCurrentAccount(ViewData.eth);
-    }
-    
     const provider = new ethers.providers.Web3Provider(ethereum)
     const signer = provider.getSigner(account);
-    ViewData.signer = signer;
 
     const signature = await signer.signMessage(msgContent);
+    if(!signature)
+      return;
     //console.log("signature: " + signature);
     const res = await axios.post(APIs.Account_Authenticate, {
       message: msgContent,
@@ -132,8 +128,13 @@ export const NavBar = () => {
     });
     const data = res.data;
     if(data && data.success === true){
+      ViewData.signer = signer;
+      ViewData.eth = account;
+      setCurrentAccount(ViewData.eth);
+      
       console.log("Connected to: " + data.account);
       await getDIDs();
+      ViewData.loggedIn = true;
       toast({
         title: 'Connected!',
         description: "Your wallet address: " + ViewData.eth,
@@ -155,6 +156,7 @@ export const NavBar = () => {
   const tryDisConnect = async () => {
     //disconnect();
     ViewData.eth = "";
+    ViewData.loggedIn = false;
     setCurrentAccount("");
     ViewMdoelBridge.DNA = EmptyDNA;
     ViewMdoelBridge.Cids = EmptyCids;
@@ -166,6 +168,7 @@ export const NavBar = () => {
     //   duration: 3000,
     //   isClosable: true,
     // });
+    navigate(RoutesData.Home);
   }
 
   const afterActivated = () => {
@@ -234,13 +237,13 @@ export const NavBar = () => {
               <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
               {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.eth || accountActivated ? "hidden" : "visible"}>Activate</Link> */}
               {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
-              <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.eth && accountActivated ? "visible" : "hidden"}>Profile</Link>
+              <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.loggedIn && accountActivated ? "visible" : "hidden"}>Profile</Link>
             </HStack>
           </HStack>
 
           <Flex alignItems={'center'}>
             <HStack direction={'row'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.eth || accountActivated ? "hidden" : "visible"}>Activate</Link>
+              <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.loggedIn || accountActivated ? "hidden" : "visible"}>Activate</Link>
               {renderUserMenus()}
               {/* <ColorModeSwitcher /> */}
             </HStack>
@@ -251,9 +254,12 @@ export const NavBar = () => {
         <Box pb={4} display={{ md: 'none' }}>
           <Stack as={'nav'} spacing={4}>
             <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
+            {ViewData.loggedIn ? null : <Link as={Button} onClick={(e:any)=>{tryConnect();}}>Connect</Link>}
             {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={ViewData.eth && accountActivated ? "hidden" : "visible"}>Activate</Link> */}
             {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
-            <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.eth && accountActivated ? "visible" : "hidden"}>Profile</Link>
+            {/* <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.loggedIn && accountActivated ? "visible" : "hidden"}>Profile</Link> */}
+            {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Profile}>Profile</Link> : null}
+            {ViewData.loggedIn && !accountActivated ? <Link as={ReactLink} to={RoutesData.Activate}>Activate</Link> : null}
           </Stack>
         </Box>
       ) : null}

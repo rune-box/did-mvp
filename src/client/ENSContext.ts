@@ -12,7 +12,7 @@ export class ENSContext extends DIDBase{
     async useAddress(address: string){
         this.evmAddress = address;
         const result = await this.provider.lookupAddress(address);
-        this.did = result === null ? "" : result;
+        this.did = result || "";
     }
 
     async useDid(ens: string){

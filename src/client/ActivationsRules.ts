@@ -111,7 +111,94 @@ export const ActivationsRules_DAOSquare = {
 };
 
 export const ActivationsRules_Debank = {
-    // 
+    "title": "BAB + Debank Score > 42",
+    "description": "",
+    "rules": [
+        {
+            "id": "a2a28e84339a4afaaf4e05672e14f3db",
+            "factor": 1,
+            "rune": {
+                "id": "a2a28e84339a4afaaf4e05672e14f3db",
+                "title": "Debank Score",
+                "description": "",
+                "dataType": "double",
+                "apis": [
+                    {
+                        "provider": "Debank",
+                        "uri": AppSettings.APIPrefix + "products/debank/fetch-item?rune=a2a28e84339a4afaaf4e05672e14f3db&address=",
+                        "lastPingAt": 0
+                    }
+                ],
+                "isTask": false,
+                "possibleValues": [],
+                "keywords": [
+                    "debank",
+                    "score",
+                    "evm"
+                ],
+                "schemaVersion": 0
+            },
+            "boolRules": [],
+            "numberRules": [
+                {
+                    "id": "6b9e45cdbdcf4d09b06ed53d67c4f92f",
+                    "leftCondition": "(",
+                    "leftValue": 42,
+                    "condition": "",
+                    "rightCondition": "]",
+                    "rightValue": 100,
+                    "score": 1
+                },
+                {
+                    "id": "0a60b43d80574f4cab63c1b4b517d3f8",
+                    "leftCondition": "[",
+                    "leftValue": 0,
+                    "condition": "",
+                    "rightCondition": "]",
+                    "rightValue": 42,
+                    "score": 0
+                }
+            ],
+            "textRules": []
+        },
+        // {
+        //     "id": "eeaddc282ac140008ee962a7bd33e7ae",
+        //     "factor": 1,
+        //     "rune": {
+        //         "id": "eeaddc282ac140008ee962a7bd33e7ae",
+        //         "title": "Has a BAB token (BNB)",
+        //         "description": "",
+        //         "dataType": "boolean",
+        //         "apis": [
+        //             {
+        //                 "provider": "Runebox",
+        //                 "uri": AppSettings.APIPrefix + "chains/bnb/fetch-item?rune=eeaddc282ac140008ee962a7bd33e7ae&address=",
+        //                 "lastPingAt": 0
+        //             }
+        //         ],
+        //         "isTask": false,
+        //         "possibleValues": [],
+        //         "keywords": [
+        //             "bab token",
+        //             "bnb",
+        //             "bsc",
+        //             "kyc",
+        //             "binance"
+        //         ],
+        //         "schemaVersion": 0
+        //     },
+        //     "boolRules": [
+        //         {
+        //             "id": "39bb6517f98e465d9a80edc1c4184d9b",
+        //             "trueScore": 1,
+        //             "falseScore": 0
+        //         }
+        //     ],
+        //     "numberRules": [],
+        //     "textRules": []
+        // }
+    ],
+    "schemaVersion": 0
 };
 
 export const ActivationsRules_Goodghosting = {

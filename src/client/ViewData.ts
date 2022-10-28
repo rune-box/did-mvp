@@ -11,6 +11,7 @@ export const ViewData = {
     displayName: "",
     //ceramicContext: new CeramicContext(),
     signer: <any>null,
+    loggedIn: false,
     afterLoggedIn: () => {},
 
     activated: false,

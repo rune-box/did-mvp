@@ -2,9 +2,10 @@ import { CheckCircleIcon, CheckIcon, DownloadIcon, LinkIcon, LockIcon, RepeatIco
 import { Box, Button, CircularProgress, Code, Divider, Heading, HStack, IconButton, List, ListIcon, ListItem, Menu, MenuButton, MenuItem, MenuList, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import axios from "axios";
 import { ethers } from "ethers";
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ActivationsRules_DAOSquare, ActivationsRules_Goodghosting } from "../client/ActivationsRules";
+import { ActivationsRules_DAOSquare, ActivationsRules_Debank, ActivationsRules_Goodghosting } from "../client/ActivationsRules";
+import { DIDUtility } from "../client/DIDBase";
 import { RoutesData } from "../client/RoutesData";
 import { RunesData } from "../client/RunesData";
 import { EmptyDNA, ViewData, ViewMdoelBridge } from "../client/ViewData";
@@ -25,9 +26,12 @@ export const ActivateView = () => {
     const [holdENS, setHoldENS] = React.useState(ViewData.did.ens.length > 4);
     const [holdDid, setHoldDid] = React.useState(holdDotbit || holdENS);
     const [holdDids, setHoldDids] = React.useState(holdDotbit && holdENS);
+    const [holdSameDids, setHoldSameDids] = React.useState( DIDUtility.isSame(ViewData.did.dotbit, ViewData.did.ens) );
     const [holdBAB, setHoldBAB] = React.useState(false);
     const [checkingDAOSquare, setCheckingDAOSquare] = React.useState(false);
     const [daoSquareIsOK, setDaoSquareIsOK] = React.useState(false);
+    const [checkingDebank, setCheckingDebank] = React.useState(false);
+    const [debankIsOK, setDebankIsOK] = React.useState(false);
     const [checkingGoodghosting, setCheckingGoodghosting] = React.useState(false);
     const [goodghostingIsOK, setGoodghostingIsOK] = React.useState(false);
     const [checkingIdena, setCheckingIdena] = React.useState(false);
@@ -54,10 +58,26 @@ export const ActivateView = () => {
             const result = await ComputeScoreDirectly(ActivationsRules_DAOSquare.rules, ViewData.eth);
             const ok = (result.score > 0);
             setDaoSquareIsOK(ok);
-            if(ok && holdDid) setIsEligible(true);
+            //if(ok && holdDid) setIsEligible(true);
+            return ok;
         }
         finally{
             setCheckingDAOSquare(false);
+        }
+    };
+    const checkDebank = async () => {
+        try{
+            setCheckingDebank(true);
+            const result = await ComputeScoreDirectly(ActivationsRules_Debank.rules, ViewData.eth);
+            const ok = (result.score >=1);
+            setDebankIsOK(ok);
+            // const bab = result.data.get(RunesData.ID_HoldBAB) as boolean;
+            // setHoldBAB(bab);
+            // if(ok && bab && holdDid) setIsEligible(true);
+            return ok;
+        }
+        finally{
+            setCheckingDebank(false);
         }
     };
     const checkGoodghosting = async () => {
@@ -66,14 +86,16 @@ export const ActivateView = () => {
             const result = await ComputeScoreDirectly(ActivationsRules_Goodghosting.rules, ViewData.eth);
             const ok = (result.score >=2);
             setGoodghostingIsOK(ok);
-            const bab = result.data.get(RunesData.ID_HoldBAB) as boolean;
-            setHoldBAB(bab);
-            if(ok && bab && holdDid) setIsEligible(true);
+            // const bab = result.data.get(RunesData.ID_HoldBAB) as boolean;
+            // setHoldBAB(bab);
+            // if(ok && bab && holdDid) setIsEligible(true);
+            return ok;
         }
         finally{
             setCheckingGoodghosting(false);
         }
     };
+    
     const checkIdena = async () => {
         setCheckingIdena(true);
 
@@ -218,8 +240,32 @@ export const ActivateView = () => {
     }
 
     const checkEligibility = async () => {
+        if(!holdDid) return;
+        if(holdSameDids && holdBAB){
+            setIsEligible(true);
+            return;
+        }
+
         await checkDAOSquare();
-        if(!isEligible) await checkGoodghosting();
+        if(daoSquareIsOK){
+            setIsEligible(true);
+            return;
+        }
+
+        // need bab
+        if(!holdBAB) return;
+
+        await checkDebank();
+        if(debankIsOK) {
+            setIsEligible(true);
+            return;
+        }
+        
+        await checkGoodghosting();
+        if(goodghostingIsOK) {
+            setIsEligible(true);
+            return;
+        }
     }
     
     // useEffect(() => {
@@ -284,6 +330,48 @@ export const ActivateView = () => {
                             </ListItem>
                         </List>
                         <CircularProgress isIndeterminate visibility={checkingDAOSquare ? "visible" : "hidden"} />
+                    </Box>
+                </WrapItem>
+                <WrapItem padding="30px">
+                    <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>Same DIDs + BAB</Heading>
+                        <Divider />
+                        <List padding={3}>
+                            <ListItem>
+                                {renderCheckIcon(holdDid)}
+                                Hold DIDs (.eth AND .bit)
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdSameDids)}
+                                .eth == .bit
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdBAB)}
+                                Hold a BAB token
+                            </ListItem>
+                        </List>
+                        <CircularProgress isIndeterminate visibility={checkingDebank ? "visible" : "hidden"} />
+                    </Box>
+                </WrapItem>
+                <WrapItem padding="30px">
+                    <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>DID + BAB + Debank</Heading>
+                        <Divider />
+                        <List padding={3}>
+                            <ListItem>
+                                {renderCheckIcon(holdDid)}
+                                Hold a DID (.eth or .bit)
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdBAB)}
+                                Hold a BAB token
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(debankIsOK)}
+                                Debank score is greater than <Code>4.2</Code>
+                            </ListItem>
+                        </List>
+                        <CircularProgress isIndeterminate visibility={checkingDebank ? "visible" : "hidden"} />
                     </Box>
                 </WrapItem>
                 <WrapItem padding="30px">

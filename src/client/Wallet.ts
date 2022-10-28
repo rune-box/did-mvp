@@ -6,8 +6,7 @@ export const buildSignContent = (account: string) => {
     const data = {
         account: account,
         message: "Connect to DNA@RuneBox!",
-        timestamp: Date.now(),
-        nonce: nonce
+        timestamp: Date.now()
     };
     return JSON.stringify(data);
 }
