@@ -1,16 +1,21 @@
+import Arweave from "arweave/node/common";
 import { CeramicContext } from "./CeramicContext";
 import { DotbitContext } from "./DotbitContext";
 import { ENSContext } from "./ENSContext";
 
 export const ViewData = {
     eth: "",
+    ar: "",
+    sol: "",
     did: {
         dotbit: "",
         ens: ""
     },
     displayName: "",
     //ceramicContext: new CeramicContext(),
-    signer: <any>null,
+    ethSigner: <any>null,
+    arweave: <any>null,
+
     loggedIn: false,
     afterLoggedIn: () => {},
 

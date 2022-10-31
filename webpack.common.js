@@ -40,7 +40,8 @@ module.exports = {
     // hack for errors when import pw-core
     fallback: {
       buffer: require.resolve("buffer/"),
-      //crypto: require.resolve("crypto-browserify"),
+      crypto: require.resolve("crypto-browserify"),
+      constants: require.resolve("constants-browserify"),
       //http: require.resolve("stream-http"),
       //https: require.resolve("https-browserify"),
       //os: require.resolve("os-browserify/browser"),

@@ -2,7 +2,7 @@ import { getCookie } from "typescript-cookie";
 import { CookieKeys } from "./RoutesData";
 
 export const buildSignContent = (account: string) => {
-    const nonce = getCookie(CookieKeys.EthSignInNonce);
+    //const nonce = getCookie(CookieKeys.EthSignInNonce);
     const data = {
         account: account,
         message: "Connect to DNA@RuneBox!",

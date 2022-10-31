@@ -4,7 +4,9 @@ const APIPrefix_Runebox = AppSettings.APIPrefix; //"https://localhost:7153/v0/";
 const queryPart = "&address=";
 
 export const APIs = {
-    Account_Authenticate: "/connect/wallet-authenticate",
+    AuthenticateWallet_Arweave: "/connect/wallet/ar",
+    AuthenticateWallet_ETH: "/connect/wallet/eth",
+    AuthenticateWallet_SOL: "/connect/wallet/sol",
     CheckIdena: "/connect/check-idena",
     ActivateEvm: "/dna/activate-evm",
     Mutate: "/dna/mutate",

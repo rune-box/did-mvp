@@ -34,11 +34,15 @@ import { buildSignContent, requestETHNetwork } from '../client/Wallet';
 import axios from 'axios';
 import { APIs } from '../services/APIs';
 import { AppSettings } from '../client/AppData';
+import { ArweaveIcon, ETHIcon, SolanaIcon } from '../icons/Icons';
+import Arweave from 'arweave';
 
 export const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   //const [connection, connect, disconnect] = useViewerConnection();
-  const [currentAccount, setCurrentAccount] = React.useState(ViewData.eth);
+  const [currentEth, setCurrentEth] = React.useState(ViewData.eth);
+  const [currentAr, setCurrentAr] = React.useState(ViewData.ar);
+  const [currentSol, setCurrentSol] = React.useState(ViewData.sol);
   const [accountActivated, setAccountActivated]= React.useState(ViewData.activated);
   const [displayName, setDisplayName] = React.useState(ViewData.displayName);
   const toast = useToast();
@@ -63,43 +67,7 @@ export const NavBar = () => {
     console.log(ViewData.did);
   };
 
-  // const doConnect = async (account: string) => {
-  //   console.log("Connections status: " + connection.status);
-  //   const ethereum = (window as any).ethereum;
-  //   cxtCeramic.selfid = await connect(new EthereumAuthProvider(ethereum, account));
-  //   console.log("Connections status: " + connection.status);
-  //   //const core = cxtCeramic.selfid?.client.ceramic;
-
-  //   if(ViewData.eth !== account){
-  //     ViewData.eth = account;
-  //     setCurrentAccount(ViewData.eth);
-  //   }
-  //   toast({
-  //     title: 'Connected!',
-  //     description: "Your wallet address: " + ViewData.eth,
-  //     status: 'success',
-  //     duration: 3000,
-  //     isClosable: true,
-  //   });
-  //   await getDIDs();
-  // };
-  // const tryConnect = async () => {
-  //   const ethereum = (window as any).ethereum;
-  //   if(!ethereum){
-  //     toast({
-  //       title: 'No wallet detected!',
-  //       description: "Please install a wallet extension first.",
-  //       status: 'error',
-  //       duration: 5000,
-  //       isClosable: true,
-  //     });
-  //     return;
-  //   }
-  //   const accounts = await ethereum.request({method: "eth_requestAccounts"});
-  //   doConnect(accounts[0]);
-  // };
-
-  const tryConnect = async () => {
+  const tryConnectETH = async () => {
     const ethereum = (window as any).ethereum;
     if(!ethereum){
       toast({
@@ -133,22 +101,22 @@ export const NavBar = () => {
     if(!signature)
       return;
     //console.log("signature: " + signature);
-    const res = await axios.post(APIs.Account_Authenticate, {
+    const res = await axios.post(APIs.AuthenticateWallet_ETH, {
       message: msgContent,
       signature: signature
     });
     const data = res.data;
     if(data && data.success === true){
-      ViewData.signer = signer;
+      ViewData.ethSigner = signer;
       ViewData.eth = account;
-      setCurrentAccount(ViewData.eth);
+      setCurrentEth(ViewData.eth);
       
       console.log("Connected to: " + data.account);
       await getDIDs(provider);
       ViewData.loggedIn = true;
       toast({
         title: 'Connected!',
-        description: "Your wallet address: " + ViewData.eth,
+        description: "Your ETH address: " + ViewData.eth,
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -168,14 +136,14 @@ export const NavBar = () => {
     }
   };
 
-  const tryDisConnect = async () => {
+  const tryDisConnectETH = async () => {
     //disconnect();
     ViewData.eth = "";
     ViewData.displayName = "";
     ViewData.did = {dotbit: "", ens: ""};
     ViewData.loggedIn = false;
     ViewData.activated = false;
-    setCurrentAccount("");
+    setCurrentEth("");
     ViewMdoelBridge.DNA = EmptyDNA;
     ViewMdoelBridge.Cids = EmptyCids;
     //cxtCeramic.selfid = null;
@@ -189,16 +157,54 @@ export const NavBar = () => {
     navigate(RoutesData.Home);
   }
 
+  const tryConnectArweave = async () => {
+    const ar = Arweave.init({
+      host: 'arweave.net',
+      port: 443,
+      protocol: 'https'
+    });
+    ViewData.arweave = ar;
+    const address = await ar.wallets.getAddress("use_wallet");
+    console.log("ar.wallets.getAddress: " + address);
+    if(address){
+      ViewData.ar = address;
+      setCurrentAr(address);
+      toast({
+        title: 'Connected!',
+        description: "Your Arweave address: " + ViewData.ar,
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }
+  const tryDisconnectArweave = async () => {
+    //const ar = ViewData.arweave as Arweave;
+    ViewData.ar = "";
+    setCurrentAr("");
+    ViewData.arweave = null;
+  }
+
   const afterActivated = () => {
     setAccountActivated(ViewData.activated);
   }
   ViewData.afterActivated = afterActivated;
   // <Button isDisabled={connection.status === 'connecting'}
+  const renderConnectMenu = () => {
+    return (
+      <Menu>
+        <MenuButton as={Button}>Connect</MenuButton>
+        <MenuList>
+          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ETHIcon/>} onClick={tryConnectETH}>ETH | EVM</MenuItem>}
+          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ArweaveIcon/>} onClick={tryConnectArweave}>Arweave</MenuItem>}
+          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<SolanaIcon/>} isDisabled={true}>Solana</MenuItem>}
+        </MenuList>
+      </Menu>
+    );
+  };
   const renderUserMenus = () => {
-    if(!currentAccount || currentAccount.length < 42){
-      return (
-        <Button onClick={(e:any)=>{tryConnect();}}>Connect</Button>
-      );
+    if(!currentEth || currentEth.length < 42){
+      return null;
     }
     return (
       <Menu>
@@ -215,14 +221,14 @@ export const NavBar = () => {
         <MenuList>
           {/* <MenuItem as={ReactLink} to={RoutesData.Activate} visibility={accountActivated ? "hidden" : "visible"}>Activate</MenuItem> */}
           {/* <MenuItem as={ReactLink} to={RoutesData.Manage}>Manage</MenuItem> */}
-          <MenuItem onClick={() => { tryDisConnect(); }}>Disconnect</MenuItem>
+          <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect</MenuItem>
         </MenuList>
       </Menu>
     );
   };
 
   const renderUserNav = () => {
-    if(!currentAccount || currentAccount.length < 42){
+    if(!currentEth || currentEth.length < 42){
       return (
         <></>
       );
@@ -255,13 +261,14 @@ export const NavBar = () => {
               <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
               {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.eth || accountActivated ? "hidden" : "visible"}>Activate</Link> */}
               {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
-              <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.loggedIn && accountActivated ? "visible" : "hidden"}>Profile</Link>
+              {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Profile}>Profile</Link> : null }
             </HStack>
           </HStack>
 
           <Flex alignItems={'center'}>
             <HStack direction={'row'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.loggedIn || accountActivated ? "hidden" : "visible"}>Activate</Link>
+              {!ViewData.loggedIn || accountActivated ? null : <Link as={ReactLink} to={RoutesData.Activate}>Activate</Link>}
+              {renderConnectMenu()}
               {renderUserMenus()}
               {/* <ColorModeSwitcher /> */}
             </HStack>
@@ -272,7 +279,7 @@ export const NavBar = () => {
         <Box pb={4} display={{ md: 'none' }}>
           <Stack as={'nav'} spacing={4}>
             <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
-            {ViewData.loggedIn ? null : <Link as={Button} onClick={(e:any)=>{tryConnect();}}>Connect</Link>}
+            {ViewData.loggedIn ? null : <Link as={Button} onClick={(e:any)=>{tryConnectETH();}}>Connect</Link>}
             {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={ViewData.eth && accountActivated ? "hidden" : "visible"}>Activate</Link> */}
             {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
             {/* <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.loggedIn && accountActivated ? "visible" : "hidden"}>Profile</Link> */}

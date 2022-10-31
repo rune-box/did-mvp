@@ -1,5 +1,7 @@
 import { createIcon } from "@chakra-ui/icons";
-
+import { chakra, forwardRef, ImageProps, usePrefersReducedMotion } from "@chakra-ui/react";
+import ar from "./ar.svg";
+import eth from "./ethereum.svg";
 
 export const EmptyIcon = createIcon({
     displayName: "",
@@ -8,6 +10,21 @@ export const EmptyIcon = createIcon({
         <path width={128} height={128}
             transform="" 
             d="" />
+    ),
+});
+
+export const ArweaveIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={ar} width="1em" height="1em" ref={ref} {...props} />
+});
+export const ETHIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={eth} ref={ref} width="1em" height="1em" {...props} />
+});
+export const SolanaIcon = createIcon({
+    displayName: "Solana",
+    viewBox: "0 0 128 128",
+    path: (
+        <path width={128} height={128}
+            d="M93.94 42.63H13.78l20.28-20.22h80.16L93.94 42.63zM93.94 105.59H13.78l20.28-20.21h80.16M34.06 74.11h80.16L93.94 53.89H13.78" />
     ),
 });
 
