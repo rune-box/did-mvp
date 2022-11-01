@@ -17,5 +17,7 @@ module.exports = merge(common, {
         // "react-redux": { commonjs: "react-redux", commonjs2: "react-redux", amd:"react-redux"},
         // redux: { commonjs: "redux", commonjs2: "redux", amd: 'redux'},
         //"prop-types": { commonjs: "prop-types", commonjs2: "prop-types",amd: 'prop-types' }
+        //arweave: "arweave",
+        ethers: "ethers"
     },
 });

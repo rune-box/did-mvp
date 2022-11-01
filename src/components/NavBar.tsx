@@ -30,12 +30,14 @@ import { EmptyCids, EmptyDNA, ViewData, ViewMdoelBridge } from '../client/ViewDa
 import { DotbitContext } from '../client/DotbitContext';
 import { ENSContext } from '../client/ENSContext';
 import { RoutesData } from '../client/RoutesData';
-import { buildSignContent, requestETHNetwork } from '../client/Wallet';
+import { buildSignContent, buildSignContent2, requestETHNetwork } from '../client/Wallet';
 import axios from 'axios';
 import { APIs } from '../services/APIs';
 import { AppSettings } from '../client/AppData';
 import { ArweaveIcon, ETHIcon, SolanaIcon } from '../icons/Icons';
 import Arweave from 'arweave';
+import { PermissionType } from 'arconnect';
+//import * as solanaWeb3 from "@solana/web3.js";
 
 export const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -158,24 +160,68 @@ export const NavBar = () => {
   }
 
   const tryConnectArweave = async () => {
+    // arweave.js
     const ar = Arweave.init({
       host: 'arweave.net',
       port: 443,
       protocol: 'https'
     });
-    ViewData.arweave = ar;
-    const address = await ar.wallets.getAddress("use_wallet");
-    console.log("ar.wallets.getAddress: " + address);
-    if(address){
-      ViewData.ar = address;
-      setCurrentAr(address);
+    const arWallet = window.arweaveWallet;
+    if(!arWallet){
       toast({
-        title: 'Connected!',
-        description: "Your Arweave address: " + ViewData.ar,
-        status: 'success',
+        title: 'No Arweave wallet detected!',
+        description: "Your should install a Arweave wallet first.",
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
+    }
+    const permissions: Array<PermissionType> = ['ACCESS_ADDRESS', 'SIGNATURE', 'ACCESS_PUBLIC_KEY'];//
+    await arWallet.connect(permissions, {
+      name: "DNA"
+    }, {
+      host: 'arweave.net',
+      port: 443,
+      protocol: 'https'
+    });
+    const address = await arWallet.getActiveAddress();
+    const pk = await arWallet.getActivePublicKey();
+    if(address){
+      const msgContent = buildSignContent(address);
+      const msgData = Arweave.utils.stringToBuffer(msgContent);
+      const sigData = await arWallet.signature(msgData, {
+        name: "RSA-PSS",
+        saltLength: 32,
+      });
+      const signature = Arweave.utils.bufferTob64(sigData);
+      const res = await axios.post(APIs.AuthenticateWallet_Arweave, {
+        message: msgContent,
+        signature: signature,
+        publicKey: pk
+      });
+      const data = res.data;
+      console.log(data);
+      if(data && data.success === true){
+        if(data.account !== address){
+          toast({
+            title: 'Wrong account!',
+            description: "Please switch to: " + data.account,
+            status: 'error',
+            duration: 5000,
+            isClosable: true,
+          });
+          return;
+        }
+        ViewData.ar = address;
+        setCurrentAr(address);
+        toast({
+          title: 'Connected!',
+          description: "Your Arweave address: " + ViewData.ar,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     }
   }
   const tryDisconnectArweave = async () => {
@@ -183,6 +229,77 @@ export const NavBar = () => {
     ViewData.ar = "";
     setCurrentAr("");
     ViewData.arweave = null;
+  }
+
+  const tryConnectSolana = async () => {
+    //solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"), )
+    const solProvider = (window as any).solana;
+    if(!solProvider){
+      toast({
+        title: 'No wallet detected!',
+        description: "Please install a Solana wallet first.",
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    try {
+      const resp = await solProvider.connect();
+      console.log("Public Key: " + resp.publicKey.toString());
+      const address = resp.publicKey.toString();
+      if(address){
+        const message = buildSignContent(address);
+        const encodedMessage = new TextEncoder().encode(message);
+        const signedMessage = await solProvider.signMessage(encodedMessage, "utf8");
+        // {"signature":{"type":"Buffer","data":[220,244,147,48,85,8,90,211,153,190,218,244,15,162,88,221,208,65,146,189,176,228,118,173,84,95,110,153,0,192,139,191,253,82,137,130,34,32,155,57,203,174,84,110,33,169,234,82,15,146,39,115,71,1,249,166,152,234,155,5,122,110,231,15]},
+        // "publicKey":"4Dio1pbs5jZAdkhh9n6pnXQmHXamBBCqw3eRt5Ut5hEn"}
+        //const signature = new TextDecoder().decode(signedMessage.signature.data);
+        const signature = JSON.stringify(signedMessage);
+        const res = await axios.post(APIs.AuthenticateWallet_SOL, {
+          message: message,
+          signature: signature
+        });
+        const data = res.data;
+        if(data && data.success === true){
+          if(data.account !== address){
+            toast({
+              title: 'Wrong account!',
+              description: "Please switch to: " + data.account,
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            });
+            return;
+          }
+          ViewData.sol = address;
+          setCurrentSol(address);
+          toast({
+            title: 'Connected!',
+            description: "Your Solana address: " + ViewData.sol,
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      }
+    } catch (err: any) {
+        toast({
+          title: 'Error',
+          description: err.message || err,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+  }
+  const tryDisconnectSolana = async () => {
+    const solProvider = (window as any).solana;
+    if(solProvider){
+      solProvider.disconnect();
+    }
+    ViewData.sol = "";
+    setCurrentSol("");
   }
 
   const afterActivated = () => {
@@ -196,8 +313,8 @@ export const NavBar = () => {
         <MenuButton as={Button}>Connect</MenuButton>
         <MenuList>
           {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ETHIcon/>} onClick={tryConnectETH}>ETH | EVM</MenuItem>}
-          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ArweaveIcon/>} onClick={tryConnectArweave}>Arweave</MenuItem>}
-          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<SolanaIcon/>} isDisabled={true}>Solana</MenuItem>}
+          {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArweaveIcon/>} onClick={tryConnectArweave}>Arweave</MenuItem>}
+          {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolanaIcon/>} onClick={tryConnectSolana}>Solana</MenuItem>}
         </MenuList>
       </Menu>
     );
@@ -221,7 +338,9 @@ export const NavBar = () => {
         <MenuList>
           {/* <MenuItem as={ReactLink} to={RoutesData.Activate} visibility={accountActivated ? "hidden" : "visible"}>Activate</MenuItem> */}
           {/* <MenuItem as={ReactLink} to={RoutesData.Manage}>Manage</MenuItem> */}
-          <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect</MenuItem>
+          <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect ETH</MenuItem>
+          {currentAr && currentAr.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect Arweave</MenuItem> : null }
+          {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect Solana</MenuItem> : null }
         </MenuList>
       </Menu>
     );

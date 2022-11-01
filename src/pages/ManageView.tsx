@@ -1,7 +1,7 @@
 import { CheckIcon, LinkIcon } from "@chakra-ui/icons";
 import { Box, Button, ButtonGroup, Divider, Flex, IconButton, Input, InputGroup, InputLeftElement, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import { githubAuthorize, githubVerify, twitterAuthorize, twitterVerify } from "@cyberlab/social-verifier";
-import { useViewerRecord } from "@self.id/framework";
+//import { useViewerRecord } from "@self.id/framework";
 import { useState } from "react";
 //import { CeramicContext } from "../client/CeramicContext";
 import { EmptyDNA, ViewData, ViewMdoelBridge } from "../client/ViewData";
@@ -16,7 +16,7 @@ export const ManageView = () => {
     const [gistContent, setGistContent] = useState("");
     const [gistId, setGistId] = useState("");
     const toast = useToast();
-    const record = useViewerRecord("cryptoAccounts");
+    //const record = useViewerRecord("cryptoAccounts");
     
 
     const uriIdenaDesktop = AuthAPIs.getUri_Idena_Desktop(Utility.generatePlainUUID(), ViewData.eth);

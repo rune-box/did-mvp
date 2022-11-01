@@ -10,6 +10,16 @@ export const buildSignContent = (account: string) => {
     };
     return JSON.stringify(data);
 }
+export const buildSignContent2 = (account: string, publicKey: string) => {
+    //const nonce = getCookie(CookieKeys.EthSignInNonce);
+    const data = {
+        account: account,
+        publicKey: publicKey,
+        message: "Connect to DNA@RuneBox!",
+        timestamp: Date.now()
+    };
+    return JSON.stringify(data);
+}
 
 export const buildCheckIdenaContent = () => {
     const data = {

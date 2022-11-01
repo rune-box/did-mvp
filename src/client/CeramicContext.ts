@@ -5,7 +5,7 @@
 // import { EthereumAuthProvider, ThreeIdConnect } from '@3id/connect'
 // import { DIDBase } from "./DIDBase";
 
-import { SelfID } from "@self.id/framework";
+//import { SelfID } from "@self.id/framework";
 
 // export class CeramicContext{
 //     threeID: ThreeIdConnect = new ThreeIdConnect();
@@ -43,13 +43,13 @@ import { SelfID } from "@self.id/framework";
 
 
 export class CeramicContext{
-    selfid: SelfID | null = null;
+    //selfid: SelfID | null = null;
     constructor(){
         //
     }
 
-    async load(id: string){
-        const r = await this.selfid?.client.ceramic.loadStream(id);
-        return r;
-    }
+    // async load(id: string){
+    //     const r = await this.selfid?.client.ceramic.loadStream(id);
+    //     return r;
+    // }
 }
