@@ -1,12 +1,17 @@
 import Arweave from "arweave/node/common";
+import { Account2, Account4 } from "../models/Account";
 import { CeramicContext } from "./CeramicContext";
 import { DotbitContext } from "./DotbitContext";
 import { ENSContext } from "./ENSContext";
+import { AccountKeys } from "./Wallet";
 
 export const ViewData = {
+    // The key of account you logged in
+    keyOfPrimaryAccount: "",
     eth: "",
     ar: "",
     sol: "",
+    idena: "",
     did: {
         dotbit: "",
         ens: ""
@@ -30,6 +35,8 @@ export const EmptyDNA = {
         ens: "",
         crypto: {
             eth: "",
+            ar: "",
+            sol: "",
             idena: "",
             btc: "",
             ckb: ""
@@ -56,4 +63,35 @@ export class ViewMdoelBridge {
 
     static ENSContext: ENSContext;
     static DotbitContext: DotbitContext;
+
+    static getAccount3 = (key: string, account: string): Account4 | null => {
+        if(!key || !account)
+            return null;
+        return {
+            key: key,
+            account: account,
+            done: false,
+            working: false
+        };
+    }
+
+    static getSigners = () => {
+        const signers = new Array<Account4>();
+        const crypto = ViewMdoelBridge.DNA.genes.crypto;
+
+        const eth = ViewMdoelBridge.getAccount3(AccountKeys.ETH, crypto.eth);
+        if(eth) signers.push(eth);
+
+        const ar = ViewMdoelBridge.getAccount3(AccountKeys.Arweave, crypto.ar);
+        if(ar) signers.push(ar);
+
+        const sol = ViewMdoelBridge.getAccount3(AccountKeys.Solana, crypto.sol);
+        if(sol) signers.push(sol);
+
+        // Idena doesn't support Signature now.
+        // const idena = ViewMdoelBridge.getAccount2(AccountKeys.Idena, crypto.idena);
+        // if(idena) signers.push(idena);
+
+        return signers;
+    }
 }

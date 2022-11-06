@@ -1,40 +1,270 @@
+import { PermissionType } from "arconnect";
+import Arweave from "arweave";
+import axios from "axios";
+import { ethers } from "ethers";
 import { getCookie } from "typescript-cookie";
+import { Account2, Account4 } from "../models/Account";
+import { APIs } from "../services/APIs";
 import { CookieKeys } from "./RoutesData";
 
-export const buildSignContent = (account: string) => {
-    //const nonce = getCookie(CookieKeys.EthSignInNonce);
-    const data = {
-        account: account,
-        message: "Connect to DNA@RuneBox!",
-        timestamp: Date.now()
-    };
-    return JSON.stringify(data);
-}
-export const buildSignContent2 = (account: string, publicKey: string) => {
-    //const nonce = getCookie(CookieKeys.EthSignInNonce);
-    const data = {
-        account: account,
-        publicKey: publicKey,
-        message: "Connect to DNA@RuneBox!",
-        timestamp: Date.now()
-    };
-    return JSON.stringify(data);
+// export const buildSignContent = (account: string) => {
+//     //const nonce = getCookie(CookieKeys.EthSignInNonce);
+//     const data = {
+//         account: account,
+//         message: "Connect to DNA@RuneBox!",
+//         timestamp: Date.now()
+//     };
+//     return JSON.stringify(data);
+// }
+
+// export const buildCheckIdenaContent = () => {
+//     const data = {
+//         message: "Check the result of Connection with DNA.",
+//         timestamp: Date.now()
+//     };
+//     return JSON.stringify(data);
+// }
+
+export class WalletUtility {
+    static buildSignContent (account: string) {
+        //const nonce = getCookie(CookieKeys.EthSignInNonce);
+        const data = {
+            account: account,
+            message: "Connect to DNA@RuneBox!",
+            timestamp: Date.now()
+        };
+        return JSON.stringify(data);
+    }
+
+    static buildSignContent_MutateDNA (dna: string, key: string, account: string, addedAccounts: Array<Account2>, removedAccounts: Array<Account2>, signers: Array<Account4>) {
+        //const nonce = getCookie(CookieKeys.EthSignInNonce);
+        const data = {
+            signer: {
+                key: key,
+                account: account
+            },
+            dna: dna,
+            message: `DNA mutation: added ${addedAccounts.length} new accounts, removed ${removedAccounts.length} accounts. Should be signed by ${signers.length} signers.`,
+            addedAccounts: addedAccounts,
+            removedAccounts: removedAccounts,
+            signers: signers,
+            timestamp: Date.now()
+        };
+        return JSON.stringify(data);
+    }
+    
+    static buildCheckIdenaContent() {
+        const data = {
+            message: "Check the result of Connection with DNA.",
+            timestamp: Date.now()
+        };
+        return JSON.stringify(data);
+    }
+    
+    static async requestETHNetwork(ethereum: any) {
+        const result = await ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{
+                chainId: "0x1"
+            }]
+        });
+        return result;
+    }
+
+    static async connectEth(message: string, buildSignMessage: (account: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any,
+        toast: (data: any) => any) {
+        const ethereum = (window as any).ethereum;
+        if (!ethereum) {
+            toast({
+                title: 'No wallet detected!',
+                description: "Please install a wallet extension first.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        const ethNetwork = await WalletUtility.requestETHNetwork(ethereum);
+        if (ethNetwork) { // null = success
+            toast({
+                title: 'The ENS function needs ETH mainnet',
+                description: "Please switch to Ethereum Mainnet.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+        const account = accounts[0];
+        const msgContent = message || buildSignMessage(account);
+
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner(account);
+
+        const signature = await signer.signMessage(msgContent);
+        if (!signature)
+            return;
+        //console.log("signature: " + signature);
+        const res = await axios.post(uri, {
+            message: msgContent,
+            signature: signature
+        });
+        const data = res.data;
+        if (data && data.success === true) {
+            console.log("Connected to: " + data.account);
+            data["signer"] = signer;
+            data["provider"] = provider;
+            if (connected) await connected(data);
+        }
+        else {
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+
+    static async connectArweave(message: string, buildSignMessage: (account: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any,
+        toast: (data: any) => any) {
+        // arweave.js
+        const ar = Arweave.init({
+            host: 'arweave.net',
+            port: 443,
+            protocol: 'https'
+        });
+        const arWallet = window.arweaveWallet;
+        if (!arWallet) {
+            toast({
+                title: 'No Arweave wallet detected!',
+                description: "Your should install a Arweave wallet first.",
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+            });
+        }
+        const permissions: Array<PermissionType> = ['ACCESS_ADDRESS', 'SIGNATURE', 'ACCESS_PUBLIC_KEY'];//
+        await arWallet.connect(permissions, {
+            name: "DNA"
+        }, {
+            host: 'arweave.net',
+            port: 443,
+            protocol: 'https'
+        });
+        const address = await arWallet.getActiveAddress();
+        const pk = await arWallet.getActivePublicKey();
+        if (address) {
+            const msgContent = message || buildSignMessage(address);
+            const msgData = Arweave.utils.stringToBuffer(msgContent);
+            const sigData = await arWallet.signature(msgData, {
+                name: "RSA-PSS",
+                saltLength: 32,
+            });
+            const signature = Arweave.utils.bufferTob64(sigData);
+            const res = await axios.post(uri, {
+                message: msgContent,
+                signature: signature,
+                publicKey: pk
+            });
+            const data = res.data;
+            console.log(data);
+            if (data && data.success === true) {
+                if (connected) connected(data);
+            }
+            else {
+                toast({
+                    title: 'Error!',
+                    description: data.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+            }
+        }
+    }
+
+    static async connectSolana(message: string, buildSignMessage: (account: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any,
+        toast: (data: any) => any) {
+        //solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"), )
+        const solProvider = (window as any).solana;
+        if (!solProvider) {
+            toast({
+                title: 'No wallet detected!',
+                description: "Please install a Solana wallet first.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        try {
+            const resp = await solProvider.connect();
+            console.log("Public Key: " + resp.publicKey.toString());
+            const address = resp.publicKey.toString();
+            if (address) {
+                const msgContent = message || buildSignMessage(address);
+                const encodedMessage = new TextEncoder().encode(msgContent);
+                const signedMessage = await solProvider.signMessage(encodedMessage, "utf8");
+                // {"signature":{"type":"Buffer","data":[220,244,147,48,85,8,90,211,153,190,218,244,15,162,88,221,208,65,146,189,176,228,118,173,84,95,110,153,0,192,139,191,253,82,137,130,34,32,155,57,203,174,84,110,33,169,234,82,15,146,39,115,71,1,249,166,152,234,155,5,122,110,231,15]},
+                // "publicKey":"4Dio1pbs5jZAdkhh9n6pnXQmHXamBBCqw3eRt5Ut5hEn"}
+                //const signature = new TextDecoder().decode(signedMessage.signature.data);
+                const signature = JSON.stringify(signedMessage);
+                const res = await axios.post(uri, {
+                    message: msgContent,
+                    signature: signature
+                });
+                const data = res.data;
+                if (data && data.success === true) {
+                    if (connected) connected(data);
+                }
+                else {
+                    toast({
+                        title: 'Error!',
+                        description: data.error,
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    if (failed) failed();
+                }
+            }
+        } catch (err: any) {
+            toast({
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    }
+
+    static getTitleByAccountKey(key:string){
+        if(!key) return "Unknown";
+        switch(key){
+            case AccountKeys.ETH:
+                return "Eth | EVM";
+            case AccountKeys.Arweave:
+                return "Arweave";
+            case AccountKeys.Solana:
+                return "Solana";
+            case AccountKeys.Idena:
+                return "Idena";
+        }
+    }
 }
 
-export const buildCheckIdenaContent = () => {
-    const data = {
-        message: "Check the result of Connection with DNA.",
-        timestamp: Date.now()
-    };
-    return JSON.stringify(data);
-}
-
-export const requestETHNetwork = async (ethereum: any) => {
-    const result = await ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{
-            chainId: "0x1"
-        }]
-    });
-    return result;
+export class AccountKeys{
+    static readonly ETH: string = "eth";
+    static readonly Arweave: string = "ar";
+    static readonly Solana: string = "sol";
+    static readonly Idena: string = "idena";
 }

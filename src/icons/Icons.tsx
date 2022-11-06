@@ -2,6 +2,7 @@ import { createIcon } from "@chakra-ui/icons";
 import { chakra, forwardRef, ImageProps, usePrefersReducedMotion } from "@chakra-ui/react";
 import ar from "./ar.svg";
 import eth from "./ethereum.svg";
+import idena from "./idena.svg";
 
 export const EmptyIcon = createIcon({
     displayName: "",
@@ -26,6 +27,9 @@ export const SolanaIcon = createIcon({
         <path width={128} height={128}
             d="M93.94 42.63H13.78l20.28-20.22h80.16L93.94 42.63zM93.94 105.59H13.78l20.28-20.21h80.16M34.06 74.11h80.16L93.94 53.89H13.78" />
     ),
+});
+export const IdenaIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={idena} ref={ref} width="1em" height="1em" {...props} />
 });
 
 // export const ForkIcon = createIcon({

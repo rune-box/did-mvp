@@ -8,10 +8,19 @@ export const APIs = {
     AuthenticateWallet_ETH: "/connect/wallet/eth",
     AuthenticateWallet_SOL: "/connect/wallet/sol",
     CheckIdena: "/connect/check-idena",
+    CheckLinkIdena: "/dna/link/check-idena",
     ActivateEvm: "/dna/activate-evm",
-    Mutate: "/dna/mutate",
+    //Mutate: "/dna/mutate",
+    //SignMutation: "/dna/sign-mutation",
     Save: "/dna/save",
-    RefreshCIDs: "/dna/refresh-cids-by-eth"
+    RefreshCIDs: "/dna/refresh-cids-by-eth",
+
+    getUri_Link: (dna: string, key: string) => {
+        return `/dna/link/${dna}/${key}`;
+    },
+    getUri_SignMutation: (dna: string, key: string) => {
+        return `/dna/sign-mutation/${dna}/${key}`;
+    }
 };
 
 export const APIsData = {
@@ -561,6 +570,7 @@ export const APIsData = {
 };
 
 export const AuthAPIs = {
+    // authenticate
     getUri_Idena_Desktop: (token: string, eth: string) => {
         return "dna://signin/v1?token=" + token + "&"
             + "callback_url=https%3A%2F%2Fdna.runebox.xyz&"
@@ -575,6 +585,7 @@ export const AuthAPIs = {
             + `authentication_endpoint=https://dna.runebox.xyz/connect/idena/authenticate/${eth}&`
             + "favicon_url=https://dna.runebox.xyz/favicon.ico";
     },
+    // test
     getUri_Idena_Desktop_TEST: (token: string, eth: string) => {
         return "dna://signin/v1?token=" + token + "&"
             + "callback_url=https%3A%2F%2Flocalhost%3A7002&"
@@ -588,5 +599,20 @@ export const AuthAPIs = {
             + "nonce_endpoint=https://localhost:7002/connect/idena/start-session&"
             + `authentication_endpoint=https://localhost:7002/connect/idena/authenticate/${eth}&`
             + "favicon_url=https://localhost:7002/favicon.ico";
-    }
+    },
+    // Link
+    getLinkUri_Idena_Desktop: (token: string, dna: string) => {
+        return "dna://signin/v1?token=" + token + "&"
+            + "callback_url=https%3A%2F%2Fdna.runebox.xyz&"
+            + "nonce_endpoint=https%3A%2F%2Fdna.runebox.xyz%2Fconnect%2Fidena%2Fstart-session&"
+            + `authentication_endpoint=https%3A%2F%2Fdna.runebox.xyz%2Fconnect%2Fidena%2Flink%2F${dna}&`
+            + "favicon_url=https%3A%2F%2Fdna.runebox.xyz%2Ffavicon.ico";
+    },
+    getLinkUri_Idena_Web: (token: string, dna: string) => {
+        return "https://app.idena.io/dna/signin?token=" + token + "&"
+            + "callback_url=https://dna.runebox.xyz&"
+            + "nonce_endpoint=https://dna.runebox.xyz/connect/idena/start-session&"
+            + `authentication_endpoint=https://dna.runebox.xyz/connect/idena/link/${dna}&`
+            + "favicon_url=https://dna.runebox.xyz/favicon.ico";
+    },
 }

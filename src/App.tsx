@@ -1,7 +1,7 @@
 import {
   ChakraProvider,
   Box,
-  theme,
+  extendTheme,
 } from "@chakra-ui/react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { ProfileView } from "./pages/ProfileView"
@@ -10,6 +10,13 @@ import { ManageView } from "./pages/ManageView"
 //import { Provider } from "@self.id/framework"
 import { RoutesData } from "./client/RoutesData"
 import { ActivateView } from "./pages/ActivateView"
+import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
+
+const theme = extendTheme({
+  components: {
+    Steps,
+  },
+});
 
 export const App = () => {
   return (

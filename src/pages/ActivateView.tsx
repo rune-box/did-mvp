@@ -9,7 +9,7 @@ import { DIDUtility } from "../client/DIDBase";
 import { RoutesData } from "../client/RoutesData";
 import { RunesData } from "../client/RunesData";
 import { EmptyDNA, ViewData, ViewMdoelBridge } from "../client/ViewData";
-import { buildCheckIdenaContent } from "../client/Wallet";
+import { WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { APIs, AuthAPIs } from "../services/APIs";
@@ -126,7 +126,7 @@ export const ActivateView = () => {
     const checkIdena = async () => {
         setCheckingIdena(true);
 
-        const message = buildCheckIdenaContent();
+        const message = WalletUtility.buildCheckIdenaContent();
         const ethereum = (window as any).ethereum;
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner(ViewData.eth);
