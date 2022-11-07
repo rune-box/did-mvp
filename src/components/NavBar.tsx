@@ -71,29 +71,33 @@ export const NavBar = () => {
     ViewData.loggedIn = true;
     ViewData.afterLoggedIn();
     if (data.dna && data.dna.id.length > 1) { // activated
+      ViewData.activated = true;
+
       ViewMdoelBridge.DNA = data.dna;
       ViewMdoelBridge.Cids = data.cids;
-      ViewData.activated = true;
       ViewMdoelBridge.DotbitContext = new DotbitContext();
-      if(!ViewData.eth){
-        ViewData.eth = ViewMdoelBridge.DNA.genes.crypto.eth;
-        ViewData.ar = ViewMdoelBridge.DNA.genes.crypto.ar;
-        ViewData.sol = ViewMdoelBridge.DNA.genes.crypto.sol;
-        ViewData.idena = ViewMdoelBridge.DNA.genes.crypto.idena;
 
-        await ViewMdoelBridge.DotbitContext.useAddress(ViewData.eth);
-        ViewData.did = {
-          dotbit: ViewMdoelBridge.DNA.genes.dotbit,
-          ens: ViewMdoelBridge.DNA.genes.ens
-        };
-        ViewData.displayName = ViewMdoelBridge.DNA.genes.dotbit || ViewMdoelBridge.DNA.genes.ens || "";
-        setDisplayName(ViewData.displayName);
-      }
+      ViewData.eth = ViewMdoelBridge.DNA.genes.crypto.eth;
+      ViewData.ar = ViewMdoelBridge.DNA.genes.crypto.ar;
+      ViewData.sol = ViewMdoelBridge.DNA.genes.crypto.sol;
+      ViewData.idena = ViewMdoelBridge.DNA.genes.crypto.idena;
+
+      await ViewMdoelBridge.DotbitContext.useAddress(ViewData.eth);
+      ViewData.did = {
+        dotbit: ViewMdoelBridge.DNA.genes.dotbit,
+        ens: ViewMdoelBridge.DNA.genes.ens
+      };
+      ViewData.displayName = ViewMdoelBridge.DNA.genes.dotbit || ViewMdoelBridge.DNA.genes.ens || "";
+      setDisplayName(ViewData.displayName);
+
       setAccountActivated(true);
       //navigate(RoutesData.Profile);
       navigate(RoutesData.Manage);
     }
     else {
+      if(ViewData.eth){
+          await getDIDs(data.provider);
+      }
       navigate(RoutesData.Activate);
     }
   };
@@ -104,8 +108,6 @@ export const NavBar = () => {
         ViewData.ethSigner = data.signer;
         ViewData.eth = data.account;
         setCurrentEth(ViewData.eth);
-
-        await getDIDs(data.provider);
         toast({
           title: 'Connected!',
           description: "Your ETH address: " + ViewData.eth,
@@ -116,6 +118,7 @@ export const NavBar = () => {
         ViewData.keyOfPrimaryAccount = AccountKeys.ETH;
         await processDNAData(data);
       },
+      () => { },
       () => { },
       toast);
   };
@@ -158,6 +161,7 @@ export const NavBar = () => {
         await processDNAData(data);
       },
       () => { },
+      () => { },
       toast);
   }
   const tryDisconnectArweave = async () => {
@@ -188,6 +192,7 @@ export const NavBar = () => {
         await processDNAData(data);
       },
       () => { },
+      () => { },
       toast);
   }
   const tryDisconnectSolana = async () => {
@@ -210,7 +215,7 @@ export const NavBar = () => {
   ViewData.afterActivated = afterActivated;
   // <Button isDisabled={connection.status === 'connecting'}
   const renderConnectMenu = () => {
-    if(ViewData.loggedIn) return null;
+    if (ViewData.loggedIn) return null;
     return (
       <Menu>
         <MenuButton as={Button}>Connect</MenuButton>

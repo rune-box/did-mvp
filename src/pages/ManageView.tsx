@@ -52,7 +52,10 @@ export const ManageView = () => {
 
     const namespace = "runebox";
     const checkCache = async () => {
-        //
+        //test
+        console.log("Signers:");
+        console.log(signers);
+
         setNextStepDisabled(false);
     }
 
@@ -102,6 +105,7 @@ export const ManageView = () => {
               addAccount(AccountKeys.ETH, data.account);
             },
             () => { },
+            () => { },
             toast);
     }
     const linkArweave =async () => {
@@ -110,6 +114,7 @@ export const ManageView = () => {
                 addAccount(AccountKeys.Arweave, data.account);
             },
             () => { },
+            () => { },
             toast);
     }
     const linkSolana = async () => {
@@ -117,6 +122,7 @@ export const ManageView = () => {
             async (data: any) => {
                 addAccount(AccountKeys.Solana, data.account);
             },
+            () => { },
             () => { },
             toast);
     }
@@ -225,7 +231,8 @@ export const ManageView = () => {
                 isClosable: true,
             });
         }
-        signers[index].done = true;
+        setWorking(signers[index], false, true);
+
         if(data.needMoreSignature === false){ // finished
             ViewMdoelBridge.DNA = data.dna;
             ViewMdoelBridge.Cids = data.cids;
@@ -240,6 +247,26 @@ export const ManageView = () => {
             navigate(RoutesData.Profile);
         }
     }
+    const setWorking = (currentSigner: Account4, working: boolean, status: boolean) => {
+        if(!currentSigner) return;
+        const tempSigners = signers.filter(i => i.key !== currentSigner.key || i.account !== currentSigner.account);
+        setSigners(tempSigners);
+        currentSigner.working = working;
+        currentSigner.done = status;
+        if(working)
+            setSigners([currentSigner, ...tempSigners]);
+        else
+            setSigners([...tempSigners, currentSigner]);
+    }
+    // const setTaskStatus = (currentSigner: Account4, status: boolean) => {
+    //     if(!currentSigner) return;
+    //     setSigners(signers.filter(i => i.key !== currentSigner.key || i.account !== currentSigner.account));
+    //     currentSigner.done = status;
+    //     if(status)
+    //         setSigners([currentSigner, ...signers]);
+    //     else
+    //         setSigners([...signers, currentSigner]);
+    // }
 
     const sign = async (item: Account4) => {
         // TODO: check
@@ -256,16 +283,18 @@ export const ManageView = () => {
         }
 
         const message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, item.key, item.account, addedAccounts, deletedAccounts, signers);
-        item.working = true;
+        setWorking(item, true, false);
         switch(item.key){
             case AccountKeys.ETH:
                 await WalletUtility.connectEth(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.ETH),
                     async (data: any) => {
                         await processSignResult(data);
-                        item.working = false;
                     },
                     () => {
-                        item.working = false;
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
                     },
                     toast);
                 break;
@@ -273,10 +302,12 @@ export const ManageView = () => {
                 await WalletUtility.connectArweave(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Arweave),
                     async (data: any) => {
                         await processSignResult(data);
-                        item.working = false;
                     },
                     () => {
-                        item.working = false;
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
                     },
                     toast);
                 break;
@@ -284,10 +315,12 @@ export const ManageView = () => {
                 await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Solana),
                     async (data: any) => {
                         await processSignResult(data);
-                        item.working = false;
                     },
                     () => {
-                        item.working = false;
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
                     },
                     toast);
                 break;
@@ -370,7 +403,7 @@ export const ManageView = () => {
                         <Text height="50px" m={5}>{ar}</Text>
                         <Divider />
                         <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red'
+                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
                             isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Arweave || deletedAccounts.length > 0}
                             onClick={(e) => {
                                 setDeletingKey(AccountKeys.Arweave);
@@ -386,7 +419,7 @@ export const ManageView = () => {
                         <Text height="50px" m={5}>{sol}</Text>
                         <Divider />
                         <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red'
+                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
                             isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Solana || deletedAccounts.length > 0}
                             onClick={(e) => {
                                 setDeletingKey(AccountKeys.Solana);
@@ -402,7 +435,7 @@ export const ManageView = () => {
                         <Text height="50px" m={5}>{idena}</Text>
                         <Divider />
                         <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon />} colorScheme='red'
+                            <IconButton size='sm' icon={<DeleteIcon />} colorScheme='red' isRound={true}
                             isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Idena || deletedAccounts.length > 0}
                             onClick={(e) => {
                                 setDeletingKey(AccountKeys.Idena);
@@ -425,21 +458,25 @@ export const ManageView = () => {
                     </h2>
                     <AccordionPanel>
                         <HStack>
-                            {eth ? null : <Button leftIcon={<ETHIcon/>} onClick={linkEth}>ETH | EVM</Button>}
-                            {ar ? null :<Button leftIcon={<ArweaveIcon/>} onClick={linkArweave}>Arweave</Button>}
-                            {sol ? null :<Button leftIcon={<SolanaIcon/>} onClick={linkSolana}>Solana</Button>}
+                            {eth ? null : <Button leftIcon={<ETHIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
+                                onClick={linkEth}>ETH | EVM</Button>}
+                            {ar ? null :<Button leftIcon={<ArweaveIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
+                                onClick={linkArweave}>Arweave</Button>}
+                            {sol ? null :<Button leftIcon={<SolanaIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
+                                onClick={linkSolana}>Solana</Button>}
                             {idena ? null :<Box height="40px" bgColor="gray.50" padding={1}>
                                 <HStack marginLeft={1} marginRight={1} verticalAlign="middle">
                                     <Text fontWeight="bold">Idena: </Text>
                                     <Menu>
-                                        <MenuButton as={Button} size='sm' aria-label="Connect" title="Connect" variant="outline" icon={<LinkIcon/>}>1. Link</MenuButton>
+                                        <MenuButton as={Button} size='sm' aria-label="Connect" title="Connect" variant="outline"
+                                             disabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)} icon={<LinkIcon/>}>1. Link</MenuButton>
                                         <MenuList>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaDesktop} target="_blank">Desktop App</MenuItem>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaWeb} target="_blank">Web App</MenuItem>
                                         </MenuList>
                                     </Menu>
-                                    <Button size='sm' leftIcon={<RepeatIcon/>} onClick={checkIdena}
-                                        isLoading={checkingIdena}>2. Check</Button>
+                                    <Button size='sm' leftIcon={<RepeatIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)}
+                                        isLoading={checkingIdena} onClick={checkIdena}>2. Check</Button>
                                 </HStack>
                             </Box>}
                         </HStack>
@@ -498,28 +535,41 @@ export const ManageView = () => {
 
     const renderSignersSection = () => {
         return (
-            <Accordion defaultIndex={0} m={5} minWidth="600px">
-                <AccordionItem>
-                    <h2>
-                        <AccordionButton color="blue.200">
-                        <Box flex='1' textAlign='left'>Multi-Sign to Mutate (Save)</Box>
-                        </AccordionButton>
-                    </h2>
-                    <AccordionPanel>
-                        <Wrap spacing={2}>
-                            {signers.map((item: Account4, index: number) =>(
-                                <WrapItem key={index}>
-                                    <Button leftIcon={drawAccountIcon(item.key)}
-                                        colorScheme={item.done ? "green" : "twitter"}
-                                        isDisabled={item.done}
-                                        isLoading={item.working}
-                                        onClick={(e) => {sign(item);}}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
-                                </WrapItem>
-                            ))}
-                        </Wrap>
-                    </AccordionPanel>
-                </AccordionItem>
-            </Accordion>
+            // <Accordion defaultIndex={0} m={5} minWidth="600px" minHeight="200px">
+            //     <AccordionItem>
+            //         <h2>
+            //             <AccordionButton>
+            //             <Box flex='1' textAlign='left'>Multi-Sign to Mutate (Save)</Box>
+            //             </AccordionButton>
+            //         </h2>
+            //         <AccordionPanel>
+            //             <Wrap spacing={2} justify='center'>
+            //                 {signers.map((item: Account4, index: number) =>(
+            //                     <WrapItem key={index}>
+            //                         <Button leftIcon={drawAccountIcon(item.key)}
+            //                             colorScheme={item.done ? "green" : "cyan"}
+            //                             isDisabled={item.done}
+            //                             isLoading={item.working}
+            //                             onClick={(e) => {sign(item);}}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
+            //                     </WrapItem>
+            //                 ))}
+            //             </Wrap>
+            //         </AccordionPanel>
+            //     </AccordionItem>
+            // </Accordion>
+            <Box m={5} width="600px" height="300px" borderWidth={1} borderColor="green">
+                <Wrap spacing={2} justify='center'>
+                    {signers.map((item: Account4, index: number) =>(
+                        <WrapItem key={index}>
+                            <Button leftIcon={drawAccountIcon(item.key)}
+                                colorScheme={item.done ? "green" : "cyan"}
+                                isDisabled={item.done}
+                                isLoading={item.working}
+                                onClick={(e) => {sign(item);}}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
+                        </WrapItem>
+                    ))}
+                </Wrap>
+            </Box>
         );
     }
 
@@ -643,84 +693,6 @@ export const ManageView = () => {
                 <IconButton icon={<ArrowForwardIcon />} aria-label={"Next"} m={2} isRound={true} variant='outline'
                     isDisabled={nextStepDisabled} onClick={nextStep}/>
             </Flex>
-
-            {/* <Grid w="100%" height="500px" templateColumns="repeat(2, 1fr)" gap={1}>
-                <GridItem w="100%">
-                    <Box>
-                        <Heading as="h3" m={2} padding={1} backgroundColor="gray.50" color="gray.300">Genes in DNA</Heading>
-                    </Box>
-                    {renderCurrentGenesSection()}
-                </GridItem>
-                <GridItem w="100%">
-                    <Box>
-                        <Heading as="h3" m={2} padding={1} backgroundColor="gray.50" color="gray.300">Add more genes</Heading>
-                    </Box>
-                    {renderNewGenesSection()}
-                </GridItem>
-            </Grid>
-            <Grid w="100%" height="300px" templateColumns="repeat(2, 1fr)" gap={1}>
-                <GridItem w="100%">
-                    <Accordion defaultIndex={0}>
-                        <AccordionItem>
-                            <h2>
-                                <AccordionButton color="red">
-                                <Box flex='1' textAlign='left'>Deleted</Box>
-                                </AccordionButton>
-                            </h2>
-                            <AccordionPanel>
-                                <List spacing={2}>
-                                    {deletedAccounts.map((item: any, index: number) =>(
-                                        <ListItem key={index}>
-                                            <HStack>
-                                                {drawAccountIcon(item.key)}
-                                                <Text>{item.account}</Text>
-                                                <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon/>} onClick={() => { restoreAccount(item); }} />
-                                            </HStack>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            </AccordionPanel>
-                        </AccordionItem>
-                    </Accordion>
-                </GridItem>
-                <GridItem w="100%">
-                    <Accordion defaultIndex={0}>
-                        <AccordionItem>
-                            <h2>
-                                <AccordionButton color="green">
-                                <Box flex='1' textAlign='left'>Added</Box>
-                                </AccordionButton>
-                            </h2>
-                            <AccordionPanel>
-                                <List spacing={2}>
-                                    {addedAccounts.map((item: any, index: number) =>(
-                                        <ListItem key={index}>
-                                            <HStack>
-                                                {drawAccountIcon(item.key)}
-                                                <Text>{item.account}</Text>
-                                                <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon/>} onClick={() => { deleteFromAdded(item); }} />
-                                            </HStack>
-                                        </ListItem>
-                                    ))}
-                                </List>
-                            </AccordionPanel>
-                        </AccordionItem>
-                    </Accordion>
-                </GridItem>
-            </Grid> */}
-            {/* {deletedAccounts && deletedAccounts.length > 0 ? <Alert status='error'>
-                <AlertIcon />
-                <Box>
-                    <AlertTitle>Attention!</AlertTitle>
-                    <AlertDescription>
-                    The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
-                    </AlertDescription>
-                </Box>
-            </Alert> : null } */}
-            {/* <Box width="100%" padding={5} bgColor="green.300">
-                <Text as="h4" color="white" textAlign="center">⬇⬇⬇ Are you ready? Let's sign one-by-one! ⬇⬇⬇</Text>
-            </Box>
-            {renderSignersSection()} */}
             <Footer/>
 
             <AlertDialog isCentered

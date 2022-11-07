@@ -72,7 +72,7 @@ export class WalletUtility {
     }
 
     static async connectEth(message: string, buildSignMessage: (account: string) => string, uri: string,
-        connected: (data: any) => any, failed: () => any,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
         const ethereum = (window as any).ethereum;
         if (!ethereum) {
@@ -94,6 +94,7 @@ export class WalletUtility {
                 duration: 5000,
                 isClosable: true,
             });
+            if(cancelled) cancelled();
             return;
         }
         const accounts = await ethereum.request({ method: "eth_requestAccounts" });
@@ -104,8 +105,10 @@ export class WalletUtility {
         const signer = provider.getSigner(account);
 
         const signature = await signer.signMessage(msgContent);
-        if (!signature)
+        if (!signature){
+            if(cancelled) cancelled();
             return;
+        }
         //console.log("signature: " + signature);
         const res = await axios.post(uri, {
             message: msgContent,
@@ -131,7 +134,7 @@ export class WalletUtility {
     }
 
     static async connectArweave(message: string, buildSignMessage: (account: string) => string, uri: string,
-        connected: (data: any) => any, failed: () => any,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
         // arweave.js
         const ar = Arweave.init({
@@ -148,6 +151,8 @@ export class WalletUtility {
                 duration: 3000,
                 isClosable: true,
             });
+            if(cancelled) cancelled();
+            return;
         }
         const permissions: Array<PermissionType> = ['ACCESS_ADDRESS', 'SIGNATURE', 'ACCESS_PUBLIC_KEY'];//
         await arWallet.connect(permissions, {
@@ -166,6 +171,10 @@ export class WalletUtility {
                 name: "RSA-PSS",
                 saltLength: 32,
             });
+            if(!sigData){
+                if(cancelled) cancelled();
+                return;
+            }
             const signature = Arweave.utils.bufferTob64(sigData);
             const res = await axios.post(uri, {
                 message: msgContent,
@@ -191,7 +200,7 @@ export class WalletUtility {
     }
 
     static async connectSolana(message: string, buildSignMessage: (account: string) => string, uri: string,
-        connected: (data: any) => any, failed: () => any,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
         //solanaWeb3.Connection(solanaWeb3.clusterApiUrl("mainnet-beta"), )
         const solProvider = (window as any).solana;
@@ -203,6 +212,7 @@ export class WalletUtility {
                 duration: 5000,
                 isClosable: true,
             });
+            if(cancelled) cancelled();
             return;
         }
         try {
@@ -213,6 +223,10 @@ export class WalletUtility {
                 const msgContent = message || buildSignMessage(address);
                 const encodedMessage = new TextEncoder().encode(msgContent);
                 const signedMessage = await solProvider.signMessage(encodedMessage, "utf8");
+                if(!signedMessage){
+                    if(cancelled) cancelled();
+                    return;
+                }
                 // {"signature":{"type":"Buffer","data":[220,244,147,48,85,8,90,211,153,190,218,244,15,162,88,221,208,65,146,189,176,228,118,173,84,95,110,153,0,192,139,191,253,82,137,130,34,32,155,57,203,174,84,110,33,169,234,82,15,146,39,115,71,1,249,166,152,234,155,5,122,110,231,15]},
                 // "publicKey":"4Dio1pbs5jZAdkhh9n6pnXQmHXamBBCqw3eRt5Ut5hEn"}
                 //const signature = new TextDecoder().decode(signedMessage.signature.data);

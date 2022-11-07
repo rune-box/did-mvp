@@ -94,4 +94,16 @@ export class ViewMdoelBridge {
 
         return signers;
     }
+
+    static hasOneAccount(items: Array<Account2>, key: string){
+        if(!items || !key) return false;
+        const index = items.findIndex(i => i.key === key);
+        return (index >= 0);
+    }
+    static isInChangedItems(addedItems: Array<Account2>, removedItems: Array<Account2>, key: string){
+        if(!key) return false;
+        const indexAdded = addedItems.findIndex(i => i.key === key);
+        const indexRemoved = removedItems.findIndex(i => i.key === key);
+        return (indexAdded >= 0 || indexRemoved >= 0);
+    }
 }
