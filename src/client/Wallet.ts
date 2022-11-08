@@ -6,6 +6,8 @@ import { getCookie } from "typescript-cookie";
 import { Account2, Account4 } from "../models/Account";
 import { APIs } from "../services/APIs";
 import { CookieKeys } from "./RoutesData";
+import {Keplr, StdSignDoc} from "@keplr-wallet/types";
+import { OfflineSigner, SigningCosmosClient } from "@cosmjs/launchpad";
 
 // export const buildSignContent = (account: string) => {
 //     //const nonce = getCookie(CookieKeys.EthSignInNonce);
@@ -156,12 +158,12 @@ export class WalletUtility {
         }
         const permissions: Array<PermissionType> = ['ACCESS_ADDRESS', 'SIGNATURE', 'ACCESS_PUBLIC_KEY'];//
         await arWallet.connect(permissions, {
-            name: "DNA"
-        }, {
-            host: 'arweave.net',
-            port: 443,
-            protocol: 'https'
-        });
+                name: "DNA"
+            }, {
+                host: 'arweave.net',
+                port: 443,
+                protocol: 'https'
+            });
         const address = await arWallet.getActiveAddress();
         const pk = await arWallet.getActivePublicKey();
         if (address) {
@@ -176,6 +178,8 @@ export class WalletUtility {
                 return;
             }
             const signature = Arweave.utils.bufferTob64(sigData);
+            console.log("Ar sig: ");
+            console.log(sigData);
             const res = await axios.post(uri, {
                 message: msgContent,
                 signature: signature,
@@ -196,6 +200,69 @@ export class WalletUtility {
                 });
                 if (failed) failed();
             }
+        }
+    }
+
+    static async connectCosmos(message: string, buildSignMessage: (account: string) => string, uri: string,
+    connected: (data: any) => any, failed: () => any, cancelled: () => any,
+    toast: (data: any) => any){
+        const keplr = (window as any).keplr as Keplr;
+        if(!keplr){
+            toast({
+                title: 'No wallet detected!',
+                description: "Please install a Keplr wallet first.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if(cancelled) cancelled();
+            return;
+        }
+        try{
+            const chainId = "cosmoshub-4";
+            await keplr.enable(chainId);
+            const offlineSigner = (window as any).getOfflineSigner(chainId) as OfflineSigner;
+            const accounts = await offlineSigner.getAccounts();
+            const client = new SigningCosmosClient(
+                "https://lcd-cosmoshub.keplr.app",
+                accounts[0].address,
+                offlineSigner,
+            );
+            const account = accounts[0].address;
+            const msgContent = message || buildSignMessage(account);
+            const resSignature = await keplr.signArbitrary(chainId, account, msgContent);
+            console.log("pubKey type:" + resSignature.pub_key.type);
+            console.log("pubKey:" + resSignature.pub_key.value);
+            console.log("signature:" + resSignature.signature);
+            const res = await axios.post(uri, {
+                message: msgContent,
+                signature: JSON.stringify(resSignature)
+            });
+            const data = res.data;
+            console.log(data);
+            if (data && data.success === true) {
+                if (connected) connected(data);
+            }
+            else {
+                toast({
+                    title: 'Error!',
+                    description: data.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+            }
+        }
+        catch (err: any) {
+            toast({ 
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
         }
     }
 
@@ -258,6 +325,7 @@ export class WalletUtility {
                 duration: 5000,
                 isClosable: true,
             });
+            if (failed) failed();
         }
     }
 
@@ -279,6 +347,7 @@ export class WalletUtility {
 export class AccountKeys{
     static readonly ETH: string = "eth";
     static readonly Arweave: string = "ar";
+    static readonly Atom: string = "atom";
     static readonly Solana: string = "sol";
     static readonly Idena: string = "idena";
 }

@@ -6,6 +6,8 @@ const queryPart = "&address=";
 export const APIs = {
     AuthenticateWallet_Arweave: "/connect/wallet/ar",
     AuthenticateWallet_ETH: "/connect/wallet/eth",
+    AuthenticateWallet_Cosmos: "/connect/wallet/atom",
+    AuthenticateWallet_Polkadot: "/connect/wallet/dot",
     AuthenticateWallet_SOL: "/connect/wallet/sol",
     CheckIdena: "/connect/check-idena",
     CheckLinkIdena: "/dna/link/check-idena",

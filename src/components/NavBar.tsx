@@ -29,13 +29,14 @@ import { ENSContext } from '../client/ENSContext';
 import { RoutesData } from '../client/RoutesData';
 import { AccountKeys, WalletUtility } from '../client/Wallet';
 import { APIs } from '../services/APIs';
-import { ArweaveIcon, ETHIcon, SolanaIcon } from '../icons/Icons';
+import { ArweaveIcon, AtomIcon, ETHIcon, SolanaIcon } from '../icons/Icons';
 
 export const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   //const [connection, connect, disconnect] = useViewerConnection();
   const [currentEth, setCurrentEth] = React.useState(ViewData.eth);
   const [currentAr, setCurrentAr] = React.useState(ViewData.ar);
+  const [currentAtom, setCurrentAtom] = React.useState(ViewData.atom);
   const [currentSol, setCurrentSol] = React.useState(ViewData.sol);
   const [accountActivated, setAccountActivated] = React.useState(ViewData.activated);
   const [displayName, setDisplayName] = React.useState(ViewData.displayName);
@@ -176,6 +177,35 @@ export const NavBar = () => {
     ViewData.keyOfPrimaryAccount = "";
   }
 
+  const tryConnectCosmos = async () => {
+    await WalletUtility.connectCosmos("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Cosmos,
+      async (data: any) => {
+        ViewData.atom = data.account;
+        setCurrentAtom(data.account);
+        toast({
+          title: 'Connected!',
+          description: "Your Cosmos address: " + ViewData.atom,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        ViewData.keyOfPrimaryAccount = AccountKeys.Atom;
+        await processDNAData(data);
+      },
+      () => { },
+      () => { },
+      toast);
+  }
+  const tryDisConnectCosmos = async () => {
+    setCurrentAtom("");
+    ViewData.atom = "";
+    ViewData.displayName = "";
+    ViewData.did = { dotbit: "", ens: "" };
+    ViewData.loggedIn = false;
+    ViewData.activated = false;
+    ViewData.keyOfPrimaryAccount = "";
+  }
+
   const tryConnectSolana = async () => {
     await WalletUtility.connectSolana("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_SOL,
       async (data: any) => {
@@ -222,6 +252,7 @@ export const NavBar = () => {
         <MenuList>
           {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ETHIcon />} onClick={tryConnectETH}>ETH | EVM</MenuItem>}
           {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArweaveIcon />} onClick={tryConnectArweave}>Arweave</MenuItem>}
+          {currentAtom && currentAtom.length > 40 ? null : <MenuItem icon={<AtomIcon />} onClick={tryConnectCosmos}>Cosmos</MenuItem>}
           {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolanaIcon />} onClick={tryConnectSolana}>Solana</MenuItem>}
         </MenuList>
       </Menu>
@@ -247,8 +278,9 @@ export const NavBar = () => {
           {/* <MenuItem as={ReactLink} to={RoutesData.Activate} visibility={accountActivated ? "hidden" : "visible"}>Activate</MenuItem> */}
           <MenuItem as={ReactLink} to={RoutesData.Manage}>Manage</MenuItem>
           <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect ETH</MenuItem>
-          {currentAr && currentAr.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect Arweave</MenuItem> : null}
-          {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect Solana</MenuItem> : null}
+          {currentAr && currentAr.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Arweave</MenuItem> : null}
+          {currentAtom && currentAtom.length > 40 ? <MenuItem icon={<AtomIcon />} onClick={tryDisConnectCosmos}>Disconnect Cosmos</MenuItem> : null}
+          {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Solana</MenuItem> : null}
         </MenuList>
       </Menu>
     );

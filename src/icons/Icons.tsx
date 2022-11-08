@@ -1,6 +1,7 @@
 import { createIcon } from "@chakra-ui/icons";
 import { chakra, forwardRef, ImageProps, usePrefersReducedMotion } from "@chakra-ui/react";
 import ar from "./ar.svg";
+import atom from "./atom.svg";
 import eth from "./ethereum.svg";
 import idena from "./idena.svg";
 
@@ -16,6 +17,9 @@ export const EmptyIcon = createIcon({
 
 export const ArweaveIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={ar} width="1em" height="1em" ref={ref} {...props} />
+});
+export const AtomIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={atom} width="1em" height="1em" ref={ref} {...props} />
 });
 export const ETHIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={eth} ref={ref} width="1em" height="1em" {...props} />

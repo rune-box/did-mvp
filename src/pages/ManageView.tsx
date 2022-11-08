@@ -13,7 +13,7 @@ import { ViewData, ViewMdoelBridge } from "../client/ViewData";
 import { AccountKeys, WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
-import { ArweaveIcon, ETHIcon, IdenaIcon, SolanaIcon } from "../icons/Icons";
+import { ArweaveIcon, AtomIcon, ETHIcon, IdenaIcon, SolanaIcon } from "../icons/Icons";
 import { Account2, Account4 } from "../models/Account";
 import { APIs, AuthAPIs } from "../services/APIs";
 import { delay } from "../utils/threads";
@@ -23,6 +23,7 @@ export const ManageView = () => {
     // current genes
     const [eth, setEth] = useState(ViewData.eth);
     const [ar, setAr] = useState(ViewData.ar);
+    const [atom, setAtom] = useState(ViewData.atom);
     const [sol, setSol] = useState(ViewData.sol);
     const [idena, setIdena] = useState(ViewData.idena);
     const [deletingKey, setDeletingKey] = useState("");
@@ -74,6 +75,8 @@ export const ManageView = () => {
                 return ViewMdoelBridge.DNA.genes.crypto.eth === account.toLocaleLowerCase();
             case AccountKeys.Arweave:
                 return ViewMdoelBridge.DNA.genes.crypto.ar === account;
+            case AccountKeys.Atom:
+                    return ViewMdoelBridge.DNA.genes.crypto.atom === account;
             case AccountKeys.Solana:
                 return ViewMdoelBridge.DNA.genes.crypto.sol === account;
             case AccountKeys.Idena:
@@ -112,6 +115,15 @@ export const ManageView = () => {
         await WalletUtility.connectArweave("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.Arweave),
             async (data: any) => {
                 addAccount(AccountKeys.Arweave, data.account);
+            },
+            () => { },
+            () => { },
+            toast);
+    }
+    const linkCosmos =async () => {
+        await WalletUtility.connectCosmos("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
+            async (data: any) => {
+                addAccount(AccountKeys.Atom, data.account);
             },
             () => { },
             () => { },
@@ -163,6 +175,10 @@ export const ManageView = () => {
                 item.account = ar;
                 setAr("");
                 break;
+            case AccountKeys.Atom:
+                    item.account = atom;
+                    setAtom("");
+                    break;
             case AccountKeys.Solana:
                 item.account = sol;
                 setSol("");
@@ -184,6 +200,9 @@ export const ManageView = () => {
                 break;
             case AccountKeys.Arweave:
                 setAr(item.account);
+                break;
+            case AccountKeys.Atom:
+                setAtom(item.account);
                 break;
             case AccountKeys.Solana:
                 setSol(item.account);
@@ -213,6 +232,8 @@ export const ManageView = () => {
                 return (<ETHIcon m={2}/>);
             case AccountKeys.Arweave:
                 return (<ArweaveIcon m={2}/>);
+            case AccountKeys.Atom:
+                    return (<AtomIcon m={2}/>);
             case AccountKeys.Solana:
                 return (<SolanaIcon m={2}/>);
             case AccountKeys.Idena:
@@ -310,6 +331,19 @@ export const ManageView = () => {
                         setWorking(item, false, false);
                     },
                     toast);
+                break;
+                case AccountKeys.Atom:
+                    await WalletUtility.connectCosmos(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
+                        async (data: any) => {
+                            await processSignResult(data);
+                        },
+                        () => {
+                            setWorking(item, false, false);
+                        },
+                        () => {
+                            setWorking(item, false, false);
+                        },
+                        toast);
                 break;
             case AccountKeys.Solana:
                 await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Solana),
@@ -412,6 +446,22 @@ export const ManageView = () => {
                         </HStack>
                     </Box>
                 </WrapItem> : null}
+                {atom ? <WrapItem padding="10px">
+                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>Cosmos</Heading>
+                        <Divider />
+                        <Text height="50px" m={5}>{atom}</Text>
+                        <Divider />
+                        <HStack as='h4' m={1} spacing={3}>
+                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
+                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Atom || deletedAccounts.length > 0}
+                            onClick={(e) => {
+                                setDeletingKey(AccountKeys.Atom);
+                                onDeleteAlertOpen();
+                            }} aria-label={"Delete"}></IconButton>
+                        </HStack>
+                    </Box>
+                </WrapItem> : null}
                 {sol ? <WrapItem padding="10px">
                     <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>Solana</Heading>
@@ -461,6 +511,8 @@ export const ManageView = () => {
                             {eth ? null : <Button leftIcon={<ETHIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
                                 onClick={linkEth}>ETH | EVM</Button>}
                             {ar ? null :<Button leftIcon={<ArweaveIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
+                                onClick={linkArweave}>Arweave</Button>}
+                            {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
                                 onClick={linkArweave}>Arweave</Button>}
                             {sol ? null :<Button leftIcon={<SolanaIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
                                 onClick={linkSolana}>Solana</Button>}
