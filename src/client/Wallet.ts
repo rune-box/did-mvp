@@ -8,24 +8,8 @@ import { APIs } from "../services/APIs";
 import { CookieKeys } from "./RoutesData";
 import {Keplr, StdSignDoc} from "@keplr-wallet/types";
 import { OfflineSigner, SigningCosmosClient } from "@cosmjs/launchpad";
-
-// export const buildSignContent = (account: string) => {
-//     //const nonce = getCookie(CookieKeys.EthSignInNonce);
-//     const data = {
-//         account: account,
-//         message: "Connect to DNA@RuneBox!",
-//         timestamp: Date.now()
-//     };
-//     return JSON.stringify(data);
-// }
-
-// export const buildCheckIdenaContent = () => {
-//     const data = {
-//         message: "Check the result of Connection with DNA.",
-//         timestamp: Date.now()
-//     };
-//     return JSON.stringify(data);
-// }
+import { web3Accounts, web3Enable, web3FromSource } from "@polkadot/extension-dapp";
+import { stringToHex } from "@polkadot/util";
 
 export class WalletUtility {
     static buildSignContent (account: string) {
@@ -63,6 +47,9 @@ export class WalletUtility {
         return JSON.stringify(data);
     }
     
+    static detectEthereum(): boolean{
+        return (window as any).ethereum;
+    }
     static async requestETHNetwork(ethereum: any) {
         const result = await ethereum.request({
             method: "wallet_switchEthereumChain",
@@ -72,7 +59,6 @@ export class WalletUtility {
         });
         return result;
     }
-
     static async connectEth(message: string, buildSignMessage: (account: string) => string, uri: string,
         connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
@@ -135,6 +121,9 @@ export class WalletUtility {
         }
     }
 
+    static detectArweave(): boolean{
+        return (window as any).arweaveWallet;
+    }
     static async connectArweave(message: string, buildSignMessage: (account: string) => string, uri: string,
         connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
@@ -203,6 +192,9 @@ export class WalletUtility {
         }
     }
 
+    static detectCosmos(): boolean{
+        return (window as any).keplr;
+    }
     static async connectCosmos(message: string, buildSignMessage: (account: string) => string, uri: string,
     connected: (data: any) => any, failed: () => any, cancelled: () => any,
     toast: (data: any) => any){
@@ -266,6 +258,87 @@ export class WalletUtility {
         }
     }
 
+    static detectPolkadot(): boolean{
+        return (window as any).injectedWeb3;
+    }
+    static async connectPolkadot(message: string, buildSignMessage: (account: string) => string, uri: string,
+    connected: (data: any) => any, failed: () => any, cancelled: () => any,
+    toast: (data: any) => any){
+        const allInjected = await web3Enable('DNA@Runebox');
+        if(!allInjected){
+            toast({
+                title: 'No wallet detected!',
+                description: "Please install a Polkadot wallet first.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if(cancelled) cancelled();
+            return;
+        }
+        try{
+            const allAccounts = await web3Accounts();
+            const account = allAccounts[0];
+            const injector = await web3FromSource(account.meta.source);
+            // console.log("web3FromSource(account.meta.source):");
+            // console.log(injector);
+            const signRaw = injector?.signer?.signRaw;
+            if(!!signRaw){
+                const msgContent = message || buildSignMessage(account.address);
+                const { signature } = await signRaw({
+                    address: account.address,
+                    data: stringToHex(msgContent),
+                    type: 'bytes'
+                });
+                // signatureVerify is in @polkadot/util-crypto
+
+                const res = await axios.post(uri, {
+                    message: msgContent,
+                    signature: signature
+                });
+                const data = res.data;
+                console.log(data);
+                if (data && data.success === true) {
+                    if (connected) connected(data);
+                }
+                else {
+                    toast({
+                        title: 'Error!',
+                        description: data.error,
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                    if (failed) failed();
+                }
+            } // if(!!signRaw)
+            else{
+                toast({
+                    title: 'Unknown!',
+                    description: "Cannot initialize a inject signer.",
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if(cancelled) cancelled();
+                return;
+            }
+        }
+        catch (err: any) {
+            toast({ 
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+
+    static detectSolana(): boolean{
+        return (window as any).solana;
+    }
     static async connectSolana(message: string, buildSignMessage: (account: string) => string, uri: string,
         connected: (data: any) => any, failed: () => any, cancelled: () => any,
         toast: (data: any) => any) {
@@ -348,6 +421,7 @@ export class AccountKeys{
     static readonly ETH: string = "eth";
     static readonly Arweave: string = "ar";
     static readonly Atom: string = "atom";
+    static readonly Polkadot: string = "dot";
     static readonly Solana: string = "sol";
     static readonly Idena: string = "idena";
 }

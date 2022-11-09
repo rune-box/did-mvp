@@ -29,7 +29,7 @@ import { ENSContext } from '../client/ENSContext';
 import { RoutesData } from '../client/RoutesData';
 import { AccountKeys, WalletUtility } from '../client/Wallet';
 import { APIs } from '../services/APIs';
-import { ArweaveIcon, AtomIcon, ETHIcon, SolanaIcon } from '../icons/Icons';
+import { ArIcon, AtomIcon, DotIcon, EthIcon, SolIcon } from '../icons/Icons';
 
 export const NavBar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -37,6 +37,7 @@ export const NavBar = () => {
   const [currentEth, setCurrentEth] = React.useState(ViewData.eth);
   const [currentAr, setCurrentAr] = React.useState(ViewData.ar);
   const [currentAtom, setCurrentAtom] = React.useState(ViewData.atom);
+  const [currentDot, setCurrentDot] = React.useState(ViewData.dot);
   const [currentSol, setCurrentSol] = React.useState(ViewData.sol);
   const [accountActivated, setAccountActivated] = React.useState(ViewData.activated);
   const [displayName, setDisplayName] = React.useState(ViewData.displayName);
@@ -80,6 +81,8 @@ export const NavBar = () => {
 
       ViewData.eth = ViewMdoelBridge.DNA.genes.crypto.eth;
       ViewData.ar = ViewMdoelBridge.DNA.genes.crypto.ar;
+      ViewData.atom = ViewMdoelBridge.DNA.genes.crypto.atom;
+      ViewData.dot = ViewMdoelBridge.DNA.genes.crypto.dot;
       ViewData.sol = ViewMdoelBridge.DNA.genes.crypto.sol;
       ViewData.idena = ViewMdoelBridge.DNA.genes.crypto.idena;
 
@@ -206,6 +209,35 @@ export const NavBar = () => {
     ViewData.keyOfPrimaryAccount = "";
   }
 
+  const tryConnectPolkadot = async () => {
+    await WalletUtility.connectPolkadot("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Polkadot,
+      async (data: any) => {
+        ViewData.dot = data.account;
+        setCurrentDot(data.account);
+        toast({
+          title: 'Connected!',
+          description: "Your Polkadot address: " + ViewData.dot,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        ViewData.keyOfPrimaryAccount = AccountKeys.Polkadot;
+        await processDNAData(data);
+      },
+      () => { },
+      () => { },
+      toast);
+  }
+  const tryDisConnectPolkadot = async () => {
+    setCurrentDot("");
+    ViewData.dot = "";
+    ViewData.displayName = "";
+    ViewData.did = { dotbit: "", ens: "" };
+    ViewData.loggedIn = false;
+    ViewData.activated = false;
+    ViewData.keyOfPrimaryAccount = "";
+  }
+
   const tryConnectSolana = async () => {
     await WalletUtility.connectSolana("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_SOL,
       async (data: any) => {
@@ -250,10 +282,11 @@ export const NavBar = () => {
       <Menu>
         <MenuButton as={Button}>Connect</MenuButton>
         <MenuList>
-          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<ETHIcon />} onClick={tryConnectETH}>ETH | EVM</MenuItem>}
-          {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArweaveIcon />} onClick={tryConnectArweave}>Arweave</MenuItem>}
-          {currentAtom && currentAtom.length > 40 ? null : <MenuItem icon={<AtomIcon />} onClick={tryConnectCosmos}>Cosmos</MenuItem>}
-          {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolanaIcon />} onClick={tryConnectSolana}>Solana</MenuItem>}
+          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<EthIcon />} onClick={tryConnectETH} isDisabled={WalletUtility.detectEthereum() === false}>ETH | EVM</MenuItem>}
+          {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArIcon />} onClick={tryConnectArweave} isDisabled={WalletUtility.detectArweave() === false}>Arweave</MenuItem>}
+          {currentAtom && currentAtom.length > 40 ? null : <MenuItem icon={<AtomIcon />} onClick={tryConnectCosmos} isDisabled={WalletUtility.detectCosmos() === false}>Cosmos</MenuItem>}
+          {currentDot && currentDot.length > 40 ? null : <MenuItem icon={<DotIcon />} onClick={tryConnectPolkadot} isDisabled={WalletUtility.detectPolkadot() === false}>Polkadot</MenuItem>}
+          {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolIcon />} onClick={tryConnectSolana} isDisabled={WalletUtility.detectSolana() === false}>Solana</MenuItem>}
         </MenuList>
       </Menu>
     );
@@ -280,6 +313,7 @@ export const NavBar = () => {
           <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect ETH</MenuItem>
           {currentAr && currentAr.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Arweave</MenuItem> : null}
           {currentAtom && currentAtom.length > 40 ? <MenuItem icon={<AtomIcon />} onClick={tryDisConnectCosmos}>Disconnect Cosmos</MenuItem> : null}
+          {currentDot && currentDot.length > 40 ? <MenuItem icon={<DotIcon />} onClick={tryDisConnectPolkadot}>Disconnect Polkadot</MenuItem> : null}
           {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Solana</MenuItem> : null}
         </MenuList>
       </Menu>

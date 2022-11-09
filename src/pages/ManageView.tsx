@@ -13,7 +13,7 @@ import { ViewData, ViewMdoelBridge } from "../client/ViewData";
 import { AccountKeys, WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
-import { ArweaveIcon, AtomIcon, ETHIcon, IdenaIcon, SolanaIcon } from "../icons/Icons";
+import { ArIcon, AtomIcon, EthIcon, IdenaIcon, SolIcon } from "../icons/Icons";
 import { Account2, Account4 } from "../models/Account";
 import { APIs, AuthAPIs } from "../services/APIs";
 import { delay } from "../utils/threads";
@@ -229,13 +229,13 @@ export const ManageView = () => {
         if(!key) return;
         switch(key){
             case AccountKeys.ETH:
-                return (<ETHIcon m={2}/>);
+                return (<EthIcon m={2}/>);
             case AccountKeys.Arweave:
-                return (<ArweaveIcon m={2}/>);
+                return (<ArIcon m={2}/>);
             case AccountKeys.Atom:
                     return (<AtomIcon m={2}/>);
             case AccountKeys.Solana:
-                return (<SolanaIcon m={2}/>);
+                return (<SolIcon m={2}/>);
             case AccountKeys.Idena:
                 return (<IdenaIcon m={2}/>);
         }
@@ -508,13 +508,13 @@ export const ManageView = () => {
                     </h2>
                     <AccordionPanel>
                         <HStack>
-                            {eth ? null : <Button leftIcon={<ETHIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
+                            {eth ? null : <Button leftIcon={<EthIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
                                 onClick={linkEth}>ETH | EVM</Button>}
-                            {ar ? null :<Button leftIcon={<ArweaveIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
+                            {ar ? null :<Button leftIcon={<ArIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
                                 onClick={linkArweave}>Arweave</Button>}
                             {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
                                 onClick={linkArweave}>Arweave</Button>}
-                            {sol ? null :<Button leftIcon={<SolanaIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
+                            {sol ? null :<Button leftIcon={<SolIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
                                 onClick={linkSolana}>Solana</Button>}
                             {idena ? null :<Box height="40px" bgColor="gray.50" padding={1}>
                                 <HStack marginLeft={1} marginRight={1} verticalAlign="middle">

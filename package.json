@@ -38,6 +38,8 @@
     "@cyberlab/social-verifier": "^2.0.1",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
+    "@polkadot/extension-dapp": "^0.44.6",
+    "@polkadot/util-crypto": "^10.1.11",
     "arweave": "^1.11.6",
     "assert": "^2.0.0",
     "axios": "^1.1.3",

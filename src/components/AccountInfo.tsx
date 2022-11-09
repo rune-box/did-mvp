@@ -141,6 +141,7 @@ export const AccountInfo = () => {
             {renderCrypto("EVM | ETH", ViewMdoelBridge.DNA.genes.crypto.eth || ViewData.eth)}
             {ViewMdoelBridge.DNA.genes.crypto.ar ? renderCrypto("Arweave", ViewMdoelBridge.DNA.genes.crypto.ar) : null}
             {ViewMdoelBridge.DNA.genes.crypto.atom ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.atom) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.dot ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.dot) : null}
             {ViewMdoelBridge.DNA.genes.crypto.sol ? renderCrypto("Solana", ViewMdoelBridge.DNA.genes.crypto.sol) : null}
             {ViewMdoelBridge.DNA.genes.crypto.idena ? renderCrypto("Idena", ViewMdoelBridge.DNA.genes.crypto.idena) : null}
             <SnapshotCard />

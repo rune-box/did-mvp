@@ -11,6 +11,7 @@ export const ViewData = {
     eth: "",
     ar: "",
     atom: "",
+    dot: "",
     sol: "",
     idena: "",
     did: {
@@ -38,6 +39,7 @@ export const EmptyDNA = {
             eth: "",
             ar: "",
             atom: "",
+            dot: "",
             sol: "",
             idena: "",
             btc: "",
@@ -89,6 +91,9 @@ export class ViewMdoelBridge {
 
         const atom = ViewMdoelBridge.getAccount3(AccountKeys.Atom, crypto.atom);
         if(atom) signers.push(atom);
+
+        const dot = ViewMdoelBridge.getAccount3(AccountKeys.Polkadot, crypto.dot);
+        if(dot) signers.push(dot);
 
         const sol = ViewMdoelBridge.getAccount3(AccountKeys.Solana, crypto.sol);
         if(sol) signers.push(sol);
