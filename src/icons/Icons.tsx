@@ -1,9 +1,22 @@
 import { createIcon } from "@chakra-ui/icons";
 import { chakra, forwardRef, ImageProps, usePrefersReducedMotion } from "@chakra-ui/react";
+import ada from "./ada.svg";
+import algo from "./algo.svg";
 import ar from "./ar.svg";
 import atom from "./atom.svg";
-import eth from "./ethereum.svg";
+import btc from "./btc.svg";
+import ckb from "./ckb.svg";
+import doge from "./doge.svg";
+import dot from "./dot.svg";
+import eth from "./eth.svg";
+import icp from "./icp.svg";
 import idena from "./idena.svg";
+import ltc from "./icp.svg";
+import near from "./near.svg";
+import rvn from "./rvn.svg";
+import sol from "./sol.svg";
+import trx from "./trx.svg";
+import xtz from "./xtz.svg";
 
 export const EmptyIcon = createIcon({
     displayName: "",
@@ -15,25 +28,56 @@ export const EmptyIcon = createIcon({
     ),
 });
 
-export const ArweaveIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+export const AdaIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={ada} width="1em" height="1em" ref={ref} {...props} />
+});
+export const AlgoIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={algo} width="1em" height="1em" ref={ref} {...props} />
+});
+export const ArIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={ar} width="1em" height="1em" ref={ref} {...props} />
 });
 export const AtomIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={atom} width="1em" height="1em" ref={ref} {...props} />
 });
-export const ETHIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+export const BtcIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={btc} width="1em" height="1em" ref={ref} {...props} />
+});
+export const CkbIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={ckb} width="1em" height="1em" ref={ref} {...props} />
+});
+export const DogeIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={doge} width="1em" height="1em" ref={ref} {...props} />
+});
+export const DotIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={dot} width="1em" height="1em" ref={ref} {...props} />
+});
+export const EthIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={eth} ref={ref} width="1em" height="1em" {...props} />
 });
-export const SolanaIcon = createIcon({
-    displayName: "Solana",
-    viewBox: "0 0 128 128",
-    path: (
-        <path width={128} height={128}
-            d="M93.94 42.63H13.78l20.28-20.22h80.16L93.94 42.63zM93.94 105.59H13.78l20.28-20.21h80.16M34.06 74.11h80.16L93.94 53.89H13.78" />
-    ),
+export const IcpIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={icp} ref={ref} width="1em" height="1em" {...props} />
 });
 export const IdenaIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={idena} ref={ref} width="1em" height="1em" {...props} />
+});
+export const LtcIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={ltc} ref={ref} width="1em" height="1em" {...props} />
+});
+export const NearIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={near} ref={ref} width="1em" height="1em" {...props} />
+});
+export const RvnIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={rvn} ref={ref} width="1em" height="1em" {...props} />
+});
+export const SolIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={sol} ref={ref} width="1em" height="1em" {...props} />
+});
+export const TrxIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={trx} ref={ref} width="1em" height="1em" {...props} />
+});
+export const XtzIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={xtz} ref={ref} width="1em" height="1em" {...props} />
 });
 
 // export const ForkIcon = createIcon({
