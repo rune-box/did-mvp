@@ -143,7 +143,7 @@ export class WalletUtility {
     }
 
     static detectArweave(): boolean{
-        return false;// (window as any).arweaveWallet;
+        return (window as any).arweaveWallet;
     }
     static async connectArweave(message: string, buildSignMessage: (account: string) => string, uri: string,
         connected: (data: any) => any, failed: () => any, cancelled: () => any,

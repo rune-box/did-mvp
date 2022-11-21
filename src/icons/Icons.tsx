@@ -1,5 +1,5 @@
 import { createIcon } from "@chakra-ui/icons";
-import { chakra, forwardRef, ImageProps, usePrefersReducedMotion } from "@chakra-ui/react";
+import { chakra, forwardRef, ImageProps } from "@chakra-ui/react";
 import ada from "./ada.svg";
 import algo from "./algo.svg";
 import ar from "./ar.svg";
@@ -17,6 +17,7 @@ import rvn from "./rvn.svg";
 import sol from "./sol.svg";
 import trx from "./trx.svg";
 import xtz from "./xtz.svg";
+import unipass from "./unipass.svg";
 
 export const EmptyIcon = createIcon({
     displayName: "",
@@ -78,6 +79,11 @@ export const TrxIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
 });
 export const XtzIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={xtz} ref={ref} width="1em" height="1em" {...props} />
+});
+
+
+export const UnipassIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={unipass} ref={ref} width="1em" height="1em" {...props} />
 });
 
 // export const ForkIcon = createIcon({

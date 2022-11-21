@@ -625,9 +625,9 @@ export const ManageView = () => {
                             <HStack>
                                 {eth ? null : <Button leftIcon={<EthIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
                                     onClick={linkEth}>ETH | EVM</Button>}
-                                {/* {ar ? null :<Button leftIcon={<ArIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
+                                {ar ? null :<Button leftIcon={<ArIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
                                     onClick={linkArweave}>Arweave</Button>}
-                                {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
+                                {/* {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
                                     onClick={linkCosmos}>Cosmos</Button>} */}
                                 {sol ? null : <Button leftIcon={<SolIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
                                     onClick={linkSolana}>Solana</Button>}
