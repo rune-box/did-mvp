@@ -312,7 +312,7 @@ export const NavBar = () => {
             {currentAlgo && currentAlgo.length > 40 ? null : <MenuItem icon={<AlgoIcon />} onClick={tryConnectAlgo}>Algorand</MenuItem>}
           </MenuGroup>
           <MenuGroup title='Sign Message'>
-            <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_BTC); }} isDisabled={true}><Text as="del">Bitcoin</Text></MenuItem>
+            <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_BTC); }} isDisabled={true}>Bitcoin</MenuItem>
             <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_CKB); }}>Nervos CKB</MenuItem>
           </MenuGroup>
         </MenuList>

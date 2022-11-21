@@ -453,7 +453,7 @@ export const ManageView = () => {
                     toast);
                 break;
             case AccountKeys.Algorand:
-                await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Algorand),
+                await WalletUtility.connectAlgo(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Algorand),
                     async (data: any) => {
                         await processSignResult(data);
                     },

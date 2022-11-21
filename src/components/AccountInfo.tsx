@@ -143,7 +143,10 @@ export const AccountInfo = () => {
             {ViewMdoelBridge.DNA.genes.crypto.atom ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.atom) : null}
             {ViewMdoelBridge.DNA.genes.crypto.dot ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.dot) : null}
             {ViewMdoelBridge.DNA.genes.crypto.sol ? renderCrypto("Solana", ViewMdoelBridge.DNA.genes.crypto.sol) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.algo ? renderCrypto("Algorand", ViewMdoelBridge.DNA.genes.crypto.algo) : null}
             {ViewMdoelBridge.DNA.genes.crypto.idena ? renderCrypto("Idena", ViewMdoelBridge.DNA.genes.crypto.idena) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.btc ? renderCrypto("Bitcoin", ViewMdoelBridge.DNA.genes.crypto.btc) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.ckb ? renderCrypto("Nervos", ViewMdoelBridge.DNA.genes.crypto.ckb) : null}
             <SnapshotCard />
         </Wrap>
     );

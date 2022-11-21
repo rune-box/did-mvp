@@ -543,10 +543,20 @@ export class WalletUtility {
                 return "Eth | EVM";
             case AccountKeys.Arweave:
                 return "Arweave";
+            case AccountKeys.Atom:
+                return "Cosmos";
+            case AccountKeys.Polkadot:
+                return "Polkadot";
             case AccountKeys.Solana:
                 return "Solana";
+            case AccountKeys.Algorand:
+                    return "Algorand";
             case AccountKeys.Idena:
                 return "Idena";
+            case AccountKeys.Bitcoin:
+                return "Bitcoin";
+            case AccountKeys.NervosCKB:
+                return "Nervos";
         }
     }
 }
