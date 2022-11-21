@@ -2,14 +2,14 @@ import { PermissionType } from "arconnect";
 import Arweave from "arweave";
 import axios from "axios";
 import { ethers } from "ethers";
-import { getCookie } from "typescript-cookie";
 import { Account2, Account4 } from "../models/Account";
-import { APIs } from "../services/APIs";
-import { CookieKeys } from "./RoutesData";
 import {Keplr, StdSignDoc} from "@keplr-wallet/types";
 import { OfflineSigner, SigningCosmosClient } from "@cosmjs/launchpad";
 import { web3Accounts, web3Enable, web3FromSource } from "@polkadot/extension-dapp";
 import { stringToHex } from "@polkadot/util";
+import { AccountKeys } from "./Constants";
+import MyAlgoConnect from "@randlabs/myalgo-connect";
+import { ViewData, ViewMdoelBridge } from "./ViewData";
 
 export class WalletUtility {
     static buildSignContent (account: string) {
@@ -22,7 +22,9 @@ export class WalletUtility {
         return JSON.stringify(data);
     }
 
-    static buildSignContent_MutateDNA (dna: string, key: string, account: string, addedAccounts: Array<Account2>, removedAccounts: Array<Account2>, signers: Array<Account4>) {
+    static buildSignContent_MutateDNA (dna: string, key: string, account: string,
+        addedAccounts: Array<Account2>, removedAccounts: Array<Account2>, signers: Array<Account4>,
+        recombinationThreshold: number) {
         //const nonce = getCookie(CookieKeys.EthSignInNonce);
         const data = {
             signer: {
@@ -34,6 +36,7 @@ export class WalletUtility {
             addedAccounts: addedAccounts,
             removedAccounts: removedAccounts,
             signers: signers,
+            recombinationThreshold: recombinationThreshold,
             timestamp: Date.now()
         };
         return JSON.stringify(data);
@@ -45,6 +48,20 @@ export class WalletUtility {
             timestamp: Date.now()
         };
         return JSON.stringify(data);
+    }
+
+    static checkCurrentAccount(savedAddress: string, connectedAddress: string, toast: any){
+        if( savedAddress && savedAddress !== connectedAddress){
+            toast({
+                title: 'Wrong wallet',
+                description: "Please switch the wallet to address: " + savedAddress,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return false;
+        }
+        return true;
     }
     
     static detectEthereum(): boolean{
@@ -87,6 +104,10 @@ export class WalletUtility {
         }
         const accounts = await ethereum.request({ method: "eth_requestAccounts" });
         const account = accounts[0];
+        if( WalletUtility.checkCurrentAccount(ViewData.eth, account, toast) === false){
+            if(cancelled) cancelled();
+            return;
+        }
         const msgContent = message || buildSignMessage(account);
 
         const provider = new ethers.providers.Web3Provider(ethereum);
@@ -122,7 +143,7 @@ export class WalletUtility {
     }
 
     static detectArweave(): boolean{
-        return (window as any).arweaveWallet;
+        return false;// (window as any).arweaveWallet;
     }
     static async connectArweave(message: string, buildSignMessage: (account: string) => string, uri: string,
         connected: (data: any) => any, failed: () => any, cancelled: () => any,
@@ -154,6 +175,10 @@ export class WalletUtility {
                 protocol: 'https'
             });
         const address = await arWallet.getActiveAddress();
+        if( WalletUtility.checkCurrentAccount(ViewData.ar, address, toast) === false){
+            if(cancelled) cancelled();
+            return;
+        }
         const pk = await arWallet.getActivePublicKey();
         if (address) {
             const msgContent = message || buildSignMessage(address);
@@ -193,7 +218,7 @@ export class WalletUtility {
     }
 
     static detectCosmos(): boolean{
-        return (window as any).keplr;
+        return false;// (window as any).keplr;
     }
     static async connectCosmos(message: string, buildSignMessage: (account: string) => string, uri: string,
     connected: (data: any) => any, failed: () => any, cancelled: () => any,
@@ -221,6 +246,10 @@ export class WalletUtility {
                 offlineSigner,
             );
             const account = accounts[0].address;
+            if( WalletUtility.checkCurrentAccount(ViewData.atom, account, toast) === false){
+                if(cancelled) cancelled();
+                return;
+            }
             const msgContent = message || buildSignMessage(account);
             const resSignature = await keplr.signArbitrary(chainId, account, msgContent);
             console.log("pubKey type:" + resSignature.pub_key.type);
@@ -259,7 +288,7 @@ export class WalletUtility {
     }
 
     static detectPolkadot(): boolean{
-        return (window as any).injectedWeb3;
+        return false;// (window as any).injectedWeb3;
     }
     static async connectPolkadot(message: string, buildSignMessage: (account: string) => string, uri: string,
     connected: (data: any) => any, failed: () => any, cancelled: () => any,
@@ -279,6 +308,10 @@ export class WalletUtility {
         try{
             const allAccounts = await web3Accounts();
             const account = allAccounts[0];
+            if( WalletUtility.checkCurrentAccount(ViewData.dot, account.address, toast) === false){
+                if(cancelled) cancelled();
+                return;
+            }
             const injector = await web3FromSource(account.meta.source);
             // console.log("web3FromSource(account.meta.source):");
             // console.log(injector);
@@ -360,6 +393,10 @@ export class WalletUtility {
             console.log("Public Key: " + resp.publicKey.toString());
             const address = resp.publicKey.toString();
             if (address) {
+                if( WalletUtility.checkCurrentAccount(ViewData.sol, address, toast) === false){
+                    if(cancelled) cancelled();
+                    return;
+                }
                 const msgContent = message || buildSignMessage(address);
                 const encodedMessage = new TextEncoder().encode(msgContent);
                 const signedMessage = await solProvider.signMessage(encodedMessage, "utf8");
@@ -402,6 +439,103 @@ export class WalletUtility {
         }
     }
 
+    static async connectAlgo(message: string, buildSignMessage: (account: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
+        toast: (data: any) => any){
+        try{
+            const myAlgoConnect = new MyAlgoConnect();
+            const settings = {
+                shouldSelectOneAccount: false,
+                openManager: false
+            };
+            const accounts = await myAlgoConnect.connect(settings);
+            const account = accounts[0];
+            if( WalletUtility.checkCurrentAccount(ViewData.algo, account.address, toast) === false){
+                if(cancelled) cancelled();
+                return;
+            }
+
+            const msgContent = message || buildSignMessage(account.address);
+            const encodedMessage = new TextEncoder().encode(msgContent);
+            const resSign = await myAlgoConnect.signBytes(encodedMessage, account.address);
+            if(!resSign){
+                if(cancelled) cancelled();
+                return;
+            }
+            const res = await axios.post(uri, {
+                message: msgContent,
+                signature: JSON.stringify(resSign)
+            });
+            const data = res.data;
+            if (data && data.success === true) {
+                if (connected) connected(data);
+            }
+            else {
+                toast({
+                    title: 'Error!',
+                    description: data.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+            }
+        } catch (err: any) {
+            toast({
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+
+    static async checkAccount (uri: string, requestData: any,
+        successed: (data: any) => any, failed: () => any,
+        toast: (data: any) => any) {
+        const reqContent = JSON.stringify(requestData);
+        const res = await axios.post(uri, requestData);
+        const data = res.data;
+        if (data && data.success === true) {
+            if (successed) successed(data);
+        }
+        else {
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+    static async submitSignature(uri: string, account: string, message: string, signature: string,
+        successed: (data: any) => any, failed: () => any,
+        toast: (data: any) => any){
+        const res = await axios.post(uri, {
+            account: account,
+            message: message,
+            signature: signature
+        });
+        const data = res.data;
+        if (data && data.success === true) {
+            if (successed) successed(data);
+        }
+        else {
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+
     static getTitleByAccountKey(key:string){
         if(!key) return "Unknown";
         switch(key){
@@ -415,13 +549,4 @@ export class WalletUtility {
                 return "Idena";
         }
     }
-}
-
-export class AccountKeys{
-    static readonly ETH: string = "eth";
-    static readonly Arweave: string = "ar";
-    static readonly Atom: string = "atom";
-    static readonly Polkadot: string = "dot";
-    static readonly Solana: string = "sol";
-    static readonly Idena: string = "idena";
 }

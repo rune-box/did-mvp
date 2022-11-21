@@ -9,6 +9,9 @@ export const APIs = {
     AuthenticateWallet_Cosmos: "/connect/wallet/atom",
     AuthenticateWallet_Polkadot: "/connect/wallet/dot",
     AuthenticateWallet_SOL: "/connect/wallet/sol",
+    AuthenticateWallet_BTC: "/connect/wallet/btc",
+    AuthenticateWallet_CKB: "/connect/wallet/ckb",
+    AuthenticateWallet_Algo: "/connect/wallet/algo",
     CheckIdena: "/connect/check-idena",
     CheckLinkIdena: "/dna/link/check-idena",
     ActivateEvm: "/dna/activate-evm",
@@ -17,12 +20,23 @@ export const APIs = {
     Save: "/dna/save",
     RefreshCIDs: "/dna/refresh-cids-by-eth",
 
+    getUri_AddLink: (dna: string, key: string) => {
+        return `/dna/add/${dna}/${key}`;
+    },
     getUri_Link: (dna: string, key: string) => {
         return `/dna/link/${dna}/${key}`;
     },
+    getUri_GetRecombinationThreshold: (dna: string) => {
+        return `/dna/get-recombination-threshold/${dna}`;
+    },
     getUri_SignMutation: (dna: string, key: string) => {
         return `/dna/sign-mutation/${dna}/${key}`;
-    }
+    },
+    getKeyFromUri: (uri: string) => {
+        if(!uri) return "";
+        const prefix = "/connect/wallet/";
+        return uri.substring(prefix.length);
+    },
 };
 
 export const APIsData = {

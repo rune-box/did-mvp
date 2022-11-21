@@ -17,6 +17,14 @@ import {
   Avatar,
   MenuList,
   MenuItem,
+  MenuGroup,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  DrawerFooter,
 } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { Logo } from '../icons/Logo';
@@ -26,19 +34,25 @@ import { EmptyCids, EmptyDNA, ViewData, ViewMdoelBridge } from '../client/ViewDa
 // import { EthereumAuthProvider, useViewerConnection } from '@self.id/framework';
 import { DotbitContext } from '../client/DotbitContext';
 import { ENSContext } from '../client/ENSContext';
+import { AccountKeys } from "../client/Constants";
 import { RoutesData } from '../client/RoutesData';
-import { AccountKeys, WalletUtility } from '../client/Wallet';
+import { WalletUtility } from '../client/Wallet';
 import { APIs } from '../services/APIs';
-import { ArIcon, AtomIcon, DotIcon, EthIcon, SolIcon } from '../icons/Icons';
+import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, DotIcon, EthIcon, SolIcon } from '../icons/Icons';
+import { SignatureForm } from './SignatureForm';
 
 export const NavBar = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isHamburgerOpen, onOpen: onHamburgerOpen, onClose: onHamburgerClose } = useDisclosure();
+  const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
+  const btnRefDrawer = React.useRef(null);
   //const [connection, connect, disconnect] = useViewerConnection();
   const [currentEth, setCurrentEth] = React.useState(ViewData.eth);
   const [currentAr, setCurrentAr] = React.useState(ViewData.ar);
   const [currentAtom, setCurrentAtom] = React.useState(ViewData.atom);
   const [currentDot, setCurrentDot] = React.useState(ViewData.dot);
   const [currentSol, setCurrentSol] = React.useState(ViewData.sol);
+  const [currentAlgo, setCurrentAlgo] = React.useState(ViewData.algo);
+  const [verifyUri, setVerifyUri] = React.useState("");
   const [accountActivated, setAccountActivated] = React.useState(ViewData.activated);
   const [displayName, setDisplayName] = React.useState(ViewData.displayName);
   const toast = useToast();
@@ -79,19 +93,7 @@ export const NavBar = () => {
       ViewMdoelBridge.Cids = data.cids;
       ViewMdoelBridge.DotbitContext = new DotbitContext();
 
-      ViewData.eth = ViewMdoelBridge.DNA.genes.crypto.eth;
-      ViewData.ar = ViewMdoelBridge.DNA.genes.crypto.ar;
-      ViewData.atom = ViewMdoelBridge.DNA.genes.crypto.atom;
-      ViewData.dot = ViewMdoelBridge.DNA.genes.crypto.dot;
-      ViewData.sol = ViewMdoelBridge.DNA.genes.crypto.sol;
-      ViewData.idena = ViewMdoelBridge.DNA.genes.crypto.idena;
-
-      await ViewMdoelBridge.DotbitContext.useAddress(ViewData.eth);
-      ViewData.did = {
-        dotbit: ViewMdoelBridge.DNA.genes.dotbit,
-        ens: ViewMdoelBridge.DNA.genes.ens
-      };
-      ViewData.displayName = ViewMdoelBridge.DNA.genes.dotbit || ViewMdoelBridge.DNA.genes.ens || "";
+      await ViewMdoelBridge.refreshViewDataByDNA();
       setDisplayName(ViewData.displayName);
 
       setAccountActivated(true);
@@ -127,28 +129,6 @@ export const NavBar = () => {
       toast);
   };
 
-  const tryDisConnectETH = async () => {
-    //disconnect();
-    ViewData.eth = "";
-    ViewData.displayName = "";
-    ViewData.did = { dotbit: "", ens: "" };
-    ViewData.loggedIn = false;
-    ViewData.activated = false;
-    ViewData.keyOfPrimaryAccount = "";
-    setCurrentEth("");
-    ViewMdoelBridge.DNA = EmptyDNA;
-    ViewMdoelBridge.Cids = EmptyCids;
-    //cxtCeramic.selfid = null;
-    // toast({
-    //   title: 'Disconnected!',
-    //   description: "Now you're a guest!",
-    //   status: 'info',
-    //   duration: 3000,
-    //   isClosable: true,
-    // });
-    navigate(RoutesData.Home);
-  }
-
   const tryConnectArweave = async () => {
     await WalletUtility.connectArweave("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Arweave,
       async (data: any) => {
@@ -167,17 +147,6 @@ export const NavBar = () => {
       () => { },
       () => { },
       toast);
-  }
-  const tryDisconnectArweave = async () => {
-    //const ar = ViewData.arweave as Arweave;
-    ViewData.ar = "";
-    setCurrentAr("");
-    ViewData.arweave = null;
-    ViewData.displayName = "";
-    ViewData.did = { dotbit: "", ens: "" };
-    ViewData.loggedIn = false;
-    ViewData.activated = false;
-    ViewData.keyOfPrimaryAccount = "";
   }
 
   const tryConnectCosmos = async () => {
@@ -199,15 +168,6 @@ export const NavBar = () => {
       () => { },
       toast);
   }
-  const tryDisConnectCosmos = async () => {
-    setCurrentAtom("");
-    ViewData.atom = "";
-    ViewData.displayName = "";
-    ViewData.did = { dotbit: "", ens: "" };
-    ViewData.loggedIn = false;
-    ViewData.activated = false;
-    ViewData.keyOfPrimaryAccount = "";
-  }
 
   const tryConnectPolkadot = async () => {
     await WalletUtility.connectPolkadot("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Polkadot,
@@ -227,15 +187,6 @@ export const NavBar = () => {
       () => { },
       () => { },
       toast);
-  }
-  const tryDisConnectPolkadot = async () => {
-    setCurrentDot("");
-    ViewData.dot = "";
-    ViewData.displayName = "";
-    ViewData.did = { dotbit: "", ens: "" };
-    ViewData.loggedIn = false;
-    ViewData.activated = false;
-    ViewData.keyOfPrimaryAccount = "";
   }
 
   const tryConnectSolana = async () => {
@@ -257,36 +208,113 @@ export const NavBar = () => {
       () => { },
       toast);
   }
-  const tryDisconnectSolana = async () => {
-    const solProvider = (window as any).solana;
-    if (solProvider) {
-      solProvider.disconnect();
-    }
+
+  const tryConnectAlgo = async () => {
+    await WalletUtility.connectAlgo("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Algo,
+      async (data: any) => {
+        ViewData.algo = data.account;
+        setCurrentSol(data.account);
+        toast({
+          title: 'Connected!',
+          description: "Your Algorand address: " + ViewData.algo,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        ViewData.keyOfPrimaryAccount = AccountKeys.Algorand;
+        await processDNAData(data);
+      },
+      () => { },
+      () => { },
+      toast);
+  }
+
+  const tryDisConnect = async () => {
+    setCurrentEth("");
+    setCurrentAr("");
+    setCurrentAtom("");
+    setCurrentDot("");
     setCurrentSol("");
+
+    setAccountActivated(false);
+    setDisplayName("");
+    
+    ViewData.eth = "";
+    ViewData.ar = "";
+    ViewData.atom = "";
+    ViewData.dot = "";
     ViewData.sol = "";
+
     ViewData.displayName = "";
     ViewData.did = { dotbit: "", ens: "" };
     ViewData.loggedIn = false;
     ViewData.activated = false;
     ViewData.keyOfPrimaryAccount = "";
+    ViewMdoelBridge.DNA = EmptyDNA;
+    ViewMdoelBridge.Cids = EmptyCids;
+
+    navigate(RoutesData.Home);
+  }
+
+  const verifySig = async (account: string, message: string, signature: string) => {
+    await WalletUtility.submitSignature(verifyUri, account, message, signature, 
+      async (data: any) => {
+        toast({
+          title: 'Connected!',
+          description: "Your address: " + data.account,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        ViewData.keyOfPrimaryAccount = APIs.getKeyFromUri(verifyUri);
+        await processDNAData(data);
+        setVerifyUri("");
+      },
+      () => {
+        setVerifyUri("");
+      },
+      toast);
+  }
+
+  const connectBySignature = async (uri: string) => {
+    if(!uri){
+      toast({
+        title: 'Error',
+        description: "The request URI is empty.",
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    setVerifyUri(uri);
+    onDrawerOpen();
   }
 
   const afterActivated = () => {
     setAccountActivated(ViewData.activated);
   }
+
   ViewData.afterActivated = afterActivated;
   // <Button isDisabled={connection.status === 'connecting'}
   const renderConnectMenu = () => {
     if (ViewData.loggedIn) return null;
     return (
       <Menu>
-        <MenuButton as={Button}>Connect</MenuButton>
+        <MenuButton as={Button}>Login</MenuButton>
         <MenuList>
-          {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<EthIcon />} onClick={tryConnectETH} isDisabled={WalletUtility.detectEthereum() === false}>ETH | EVM</MenuItem>}
-          {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArIcon />} onClick={tryConnectArweave} isDisabled={WalletUtility.detectArweave() === false}>Arweave</MenuItem>}
-          {currentAtom && currentAtom.length > 40 ? null : <MenuItem icon={<AtomIcon />} onClick={tryConnectCosmos} isDisabled={WalletUtility.detectCosmos() === false}>Cosmos</MenuItem>}
-          {currentDot && currentDot.length > 40 ? null : <MenuItem icon={<DotIcon />} onClick={tryConnectPolkadot} isDisabled={WalletUtility.detectPolkadot() === false}>Polkadot</MenuItem>}
-          {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolIcon />} onClick={tryConnectSolana} isDisabled={WalletUtility.detectSolana() === false}>Solana</MenuItem>}
+          <MenuGroup title='Connect'>
+            {currentEth && currentEth.length >= 40 ? null : <MenuItem icon={<EthIcon />} onClick={tryConnectETH} isDisabled={WalletUtility.detectEthereum() === false}>ETH | EVM</MenuItem>}
+            {currentAr && currentAr.length > 40 ? null : <MenuItem icon={<ArIcon />} onClick={tryConnectArweave} isDisabled={WalletUtility.detectArweave() === false}>Arweave</MenuItem>}
+            {currentAtom && currentAtom.length > 40 ? null : <MenuItem icon={<AtomIcon />} onClick={tryConnectCosmos} isDisabled={WalletUtility.detectCosmos() === false}>Cosmos</MenuItem>}
+            {currentDot && currentDot.length > 40 ? null : <MenuItem icon={<DotIcon />} onClick={tryConnectPolkadot} isDisabled={WalletUtility.detectPolkadot() === false}>Polkadot</MenuItem>}
+            {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolIcon />} onClick={tryConnectSolana} isDisabled={WalletUtility.detectSolana() === false}>Solana</MenuItem>}
+            {currentAlgo && currentAlgo.length > 40 ? null : <MenuItem icon={<AlgoIcon />} onClick={tryConnectAlgo}>Algorand</MenuItem>}
+          </MenuGroup>
+          <MenuGroup title='Sign Message'>
+            <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_BTC); }} isDisabled={true}><Text as="del">Bitcoin</Text></MenuItem>
+            <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_CKB); }}>Nervos CKB</MenuItem>
+          </MenuGroup>
         </MenuList>
       </Menu>
     );
@@ -310,11 +338,11 @@ export const NavBar = () => {
         <MenuList>
           {/* <MenuItem as={ReactLink} to={RoutesData.Activate} visibility={accountActivated ? "hidden" : "visible"}>Activate</MenuItem> */}
           <MenuItem as={ReactLink} to={RoutesData.Manage}>Manage</MenuItem>
-          <MenuItem onClick={() => { tryDisConnectETH(); }}>Disconnect ETH</MenuItem>
-          {currentAr && currentAr.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Arweave</MenuItem> : null}
-          {currentAtom && currentAtom.length > 40 ? <MenuItem icon={<AtomIcon />} onClick={tryDisConnectCosmos}>Disconnect Cosmos</MenuItem> : null}
-          {currentDot && currentDot.length > 40 ? <MenuItem icon={<DotIcon />} onClick={tryDisConnectPolkadot}>Disconnect Polkadot</MenuItem> : null}
-          {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnectETH }}>Disconnect Solana</MenuItem> : null}
+          <MenuItem onClick={tryDisConnect}>Disconnect</MenuItem>
+          {/* {currentAr && currentAr.length > 40 ? <MenuItem onClick={tryDisConnect}>Disconnect Arweave</MenuItem> : null}
+          {currentAtom && currentAtom.length > 40 ? <MenuItem icon={<AtomIcon />} onClick={tryDisConnect}>Disconnect Cosmos</MenuItem> : null}
+          {currentDot && currentDot.length > 40 ? <MenuItem icon={<DotIcon />} onClick={tryDisConnect}>Disconnect Polkadot</MenuItem> : null}
+          {currentSol && currentSol.length > 40 ? <MenuItem onClick={() => { tryDisConnect }}>Disconnect Solana</MenuItem> : null} */}
         </MenuList>
       </Menu>
     );
@@ -338,15 +366,16 @@ export const NavBar = () => {
   // });
 
   return (
+    <>
     <Box w="100%" bg="gray.50" px={4}>
       <Container as={Stack} maxW={'6xl'}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
           <IconButton
             size={'md'}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+            icon={isHamburgerOpen ? <CloseIcon /> : <HamburgerIcon />}
             aria-label={'Open Menu'}
             display={{ md: 'none' }}
-            onClick={isOpen ? onClose : onOpen}
+            onClick={isHamburgerOpen ? onHamburgerClose : onHamburgerOpen}
           />
           <HStack spacing={8}>
             <Logo boxSize={16} title="DNA" />
@@ -361,6 +390,7 @@ export const NavBar = () => {
           <Flex alignItems={'center'}>
             <HStack direction={'row'} spacing={4} display={{ base: 'none', md: 'flex' }}>
               {!ViewData.loggedIn || accountActivated ? null : <Link as={ReactLink} to={RoutesData.Activate}>Activate</Link>}
+              {ViewData.loggedIn ? null : <Link as={Button} onClick={tryConnectETH} isDisabled={WalletUtility.detectEthereum() === false}>Register</Link>}
               {renderConnectMenu()}
               {renderUserMenus()}
               {/* <ColorModeSwitcher /> */}
@@ -368,11 +398,12 @@ export const NavBar = () => {
           </Flex>
         </Flex>
       </Container>
-      {isOpen ? (
+      {isHamburgerOpen ? (
         <Box pb={4} display={{ md: 'none' }}>
           <Stack as={'nav'} spacing={4}>
             <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
-            {ViewData.loggedIn ? null : <Link as={Button} onClick={(e: any) => { tryConnectETH(); }}>Connect</Link>}
+            {ViewData.loggedIn ? null : <Link as={Button} onClick={tryConnectETH} isDisabled={WalletUtility.detectEthereum() === false}>Register</Link>}
+            {renderConnectMenu()}
             {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={ViewData.eth && accountActivated ? "hidden" : "visible"}>Activate</Link> */}
             {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
             {/* <Link as={ReactLink} to={RoutesData.Profile} visibility={ViewData.loggedIn && accountActivated ? "visible" : "hidden"}>Profile</Link> */}
@@ -382,5 +413,24 @@ export const NavBar = () => {
         </Box>
       ) : null}
     </Box>
+    <Drawer size="lg"
+        isOpen={isDrawerOpen}
+        placement='right'
+        onClose={onDrawerClose}
+        finalFocusRef={btnRefDrawer}>
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Connect with signature</DrawerHeader>
+          <DrawerBody>
+            <SignatureForm defaultAddress="" defaultMessage="" buildMessage={WalletUtility.buildSignContent} onVerify={verifySig}/>
+          </DrawerBody>
+          <DrawerFooter>
+            <IconButton icon={<CloseIcon />} aria-label={"Cancel"} m={2} isRound={true} variant='outline'
+                    onClick={onDrawerClose}/>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }

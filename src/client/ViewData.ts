@@ -3,7 +3,7 @@ import { Account2, Account4 } from "../models/Account";
 import { CeramicContext } from "./CeramicContext";
 import { DotbitContext } from "./DotbitContext";
 import { ENSContext } from "./ENSContext";
-import { AccountKeys } from "./Wallet";
+import { AccountKeys } from "./Constants";
 
 export const ViewData = {
     // The key of account you logged in
@@ -14,6 +14,9 @@ export const ViewData = {
     dot: "",
     sol: "",
     idena: "",
+    btc: "",
+    ckb: "",
+    algo: "",
     did: {
         dotbit: "",
         ens: ""
@@ -43,7 +46,8 @@ export const EmptyDNA = {
             sol: "",
             idena: "",
             btc: "",
-            ckb: ""
+            ckb: "",
+            algo: ""
         },
         social: {
             twitter: "",
@@ -98,11 +102,60 @@ export class ViewMdoelBridge {
         const sol = ViewMdoelBridge.getAccount3(AccountKeys.Solana, crypto.sol);
         if(sol) signers.push(sol);
 
+        const algo = ViewMdoelBridge.getAccount3(AccountKeys.Algorand, crypto.algo);
+        if(algo) signers.push(algo);
+
+        const btc = ViewMdoelBridge.getAccount3(AccountKeys.Bitcoin, crypto.btc);
+        if(btc) signers.push(btc);
+
+        const ckb = ViewMdoelBridge.getAccount3(AccountKeys.NervosCKB, crypto.ckb);
+        if(ckb) signers.push(ckb);
+
         // Idena doesn't support Signature now.
         // const idena = ViewMdoelBridge.getAccount2(AccountKeys.Idena, crypto.idena);
         // if(idena) signers.push(idena);
 
         return signers;
+    }
+    static isInDNA(key: string, account: string){
+        switch(key){
+            case AccountKeys.ETH:
+                return ViewMdoelBridge.DNA.genes.crypto.eth === account.toLocaleLowerCase();
+            case AccountKeys.Arweave:
+                return ViewMdoelBridge.DNA.genes.crypto.ar === account;
+            case AccountKeys.Atom:
+                    return ViewMdoelBridge.DNA.genes.crypto.atom === account;
+            case AccountKeys.Solana:
+                return ViewMdoelBridge.DNA.genes.crypto.sol === account;
+            case AccountKeys.Algorand:
+                return ViewMdoelBridge.DNA.genes.crypto.algo === account;
+            case AccountKeys.Idena:
+                return ViewMdoelBridge.DNA.genes.crypto.idena === account.toLocaleLowerCase();
+            case AccountKeys.Bitcoin:
+                return ViewMdoelBridge.DNA.genes.crypto.btc === account;
+            case AccountKeys.NervosCKB:
+                return ViewMdoelBridge.DNA.genes.crypto.ckb === account;
+        }
+        return false;
+    }
+
+    static async refreshViewDataByDNA(){
+        ViewData.eth = ViewMdoelBridge.DNA.genes.crypto.eth;
+      ViewData.ar = ViewMdoelBridge.DNA.genes.crypto.ar;
+      ViewData.atom = ViewMdoelBridge.DNA.genes.crypto.atom;
+      ViewData.dot = ViewMdoelBridge.DNA.genes.crypto.dot;
+      ViewData.sol = ViewMdoelBridge.DNA.genes.crypto.sol;
+      ViewData.idena = ViewMdoelBridge.DNA.genes.crypto.idena;
+      ViewData.btc = ViewMdoelBridge.DNA.genes.crypto.btc;
+      ViewData.ckb = ViewMdoelBridge.DNA.genes.crypto.ckb;
+      ViewData.algo = ViewMdoelBridge.DNA.genes.crypto.algo;
+
+      await ViewMdoelBridge.DotbitContext.useAddress(ViewData.eth);
+      ViewData.did = {
+        dotbit: ViewMdoelBridge.DNA.genes.dotbit,
+        ens: ViewMdoelBridge.DNA.genes.ens
+      };
+      ViewData.displayName = ViewMdoelBridge.DNA.genes.dotbit || ViewMdoelBridge.DNA.genes.ens || "";
     }
 
     static hasOneAccount(items: Array<Account2>, key: string){
@@ -116,4 +169,5 @@ export class ViewMdoelBridge {
         const indexRemoved = removedItems.findIndex(i => i.key === key);
         return (indexAdded >= 0 || indexRemoved >= 0);
     }
+    
 }

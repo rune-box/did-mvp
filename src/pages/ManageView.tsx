@@ -1,44 +1,62 @@
-import { ArrowBackIcon, ArrowForwardIcon, ArrowLeftIcon, ArrowRightIcon, DeleteIcon, LinkIcon, RepeatIcon } from "@chakra-ui/icons";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Alert, AlertDescription, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertIcon, AlertTitle, Box, Button, ButtonGroup, Divider, Flex, Grid, GridItem, Heading, HStack, IconButton, Input, InputGroup, InputLeftElement, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { AddIcon, ArrowBackIcon, ArrowForwardIcon, ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloseIcon, DeleteIcon, LinkIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Alert, AlertDescription, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertIcon, AlertTitle, Box, Button, ButtonGroup, Center, Divider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Grid, GridItem, Heading, HStack, IconButton, Input, InputGroup, InputLeftAddon, InputLeftElement, InputRightElement, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Select, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import axios from "axios";
 import { Step, Steps, useSteps } from "chakra-ui-steps";
 //import { githubAuthorize, githubVerify, twitterAuthorize, twitterVerify } from "@cyberlab/social-verifier";
 import React, { useEffect } from "react";
 //import { useViewerRecord } from "@self.id/framework";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AccountKeys } from "../client/Constants";
 import { RoutesData } from "../client/RoutesData";
 //import { CeramicContext } from "../client/CeramicContext";
 import { ViewData, ViewMdoelBridge } from "../client/ViewData";
-import { AccountKeys, WalletUtility } from "../client/Wallet";
+import { WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
-import { ArIcon, AtomIcon, EthIcon, IdenaIcon, SolIcon } from "../icons/Icons";
+import { SignatureForm } from "../components/SignatureForm";
+import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, EthIcon, IdenaIcon, SolIcon } from "../icons/Icons";
 import { Account2, Account4 } from "../models/Account";
+import { SignActions } from "../models/Actions";
 import { APIs, AuthAPIs } from "../services/APIs";
 import { delay } from "../utils/threads";
 import { Utility } from "../utils/Utility";
 
 export const ManageView = () => {
     // current genes
-    const [eth, setEth] = useState(ViewData.eth);
-    const [ar, setAr] = useState(ViewData.ar);
-    const [atom, setAtom] = useState(ViewData.atom);
-    const [sol, setSol] = useState(ViewData.sol);
-    const [idena, setIdena] = useState(ViewData.idena);
-    const [deletingKey, setDeletingKey] = useState("");
+    const [eth, setEth] = React.useState(ViewData.eth);
+    const [ar, setAr] = React.useState(ViewData.ar);
+    const [atom, setAtom] = React.useState(ViewData.atom);
+    const [sol, setSol] = React.useState(ViewData.sol);
+    const [algo, setAlgo] = React.useState(ViewData.algo);
+    const [idena, setIdena] = React.useState(ViewData.idena);
+    const [btc, setBtc] = React.useState(ViewData.btc);
+    const [ckb, setCkb] = React.useState(ViewData.ckb);
+    const [editingBtc, setEditingBtc] = React.useState("");
+    const [deletingKey, setDeletingKey] = React.useState("");
     // new genes
     const [checkingIdena, setCheckingIdena] = React.useState(false);
     //const [twitter, setTwitter] = useState("");
-    const [github, setGithub] = useState("");
-    const [gistContent, setGistContent] = useState("");
-    const [gistId, setGistId] = useState("");
-    
-    const [addedAccounts, setAddedAccounts] = useState(new Array<Account2>());
-    const [deletedAccounts, setDeletedAccounts] = useState(new Array<Account2>());
-    const [signers, setSigners] = useState(ViewMdoelBridge.getSigners());
+    const [github, setGithub] = React.useState("");
+    const [gistContent, setGistContent] = React.useState("");
+    const [gistId, setGistId] = React.useState("");
+
+    const [addedAccounts, setAddedAccounts] = React.useState(new Array<Account2>());
+    const [deletedAccounts, setDeletedAccounts] = React.useState(new Array<Account2>());
+    const [signers, setSigners] = React.useState(ViewMdoelBridge.getSigners());
+    const [currentSigner, setCurrentSigner] = React.useState(new Account4());
     const { isOpen: isDeleteAlertOpen, onOpen: onDeleteAlertOpen, onClose: onDeleteAlertClose } = useDisclosure();
-    const cancelRef = React.useRef(null);
+    const cancelAlertDialogRef = React.useRef(null);
+
+    const [currentMutisigThreshold, setCurrentMutisigThreshold] = React.useState(-1);
+    const [newMutisigThreshold, setNewMutisigThreshold] = React.useState(-1);
+    const [mutationMsg, setMutationMsg] = React.useState("");
+    const [signAction, setSignAction] = React.useState("");
+    const [sigKey, setSigKey] = React.useState("");
+    const [verifyUri, setVerifyUri] = React.useState("");
+    const [address, setAddress] = React.useState("");
+    const [message, setMessage] = React.useState("");
+    const { isOpen: isLinkDrawerOpen, onOpen: onLinkDrawerOpen, onClose: onLinkDrawerClose } = useDisclosure();
+    const btnRefLinkDrawer = React.useRef(undefined as any);
     const { nextStep, prevStep, reset, activeStep } = useSteps({
         initialStep: 0,
     });
@@ -46,7 +64,7 @@ export const ManageView = () => {
     const toast = useToast();
     const navigate = useNavigate();
     //const record = useViewerRecord("cryptoAccounts");
-    
+
     const uriIdenaDesktop = AuthAPIs.getLinkUri_Idena_Desktop(Utility.generatePlainUUID(), ViewMdoelBridge.DNA.hash);
     const uriIdenaWeb = AuthAPIs.getLinkUri_Idena_Web(Utility.generatePlainUUID(), ViewMdoelBridge.DNA.hash);
     //const cxtCeramic: CeramicContext = ViewData.ceramicContext;
@@ -54,39 +72,46 @@ export const ManageView = () => {
     const namespace = "runebox";
     const checkCache = async () => {
         //test
-        console.log("Signers:");
-        console.log(signers);
+        // console.log("Signers:");
+        // console.log(signers);
 
         setNextStepDisabled(false);
+    }
+    const getMultisigThreshold = async () => {
+        if(currentMutisigThreshold > 0)
+            return;
+        const uri = APIs.getUri_GetRecombinationThreshold(ViewMdoelBridge.DNA.hash);
+        const res = await axios.get(uri);
+        const data = res.data;
+        if (data && data.success === true) {
+            setCurrentMutisigThreshold(data.recombinationThreshold);
+            setNewMutisigThreshold(data.recombinationThreshold);
+        }
+        else {
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     }
 
     const checkTheAdded = (key: string, account: string) => {
         let exists = addedAccounts.filter(i => i.account === account && i.key === key);
-        if(exists.length > 0){
+        if (exists.length > 0) {
             return true;
         }
         exists = deletedAccounts.filter(i => i.account === account && i.key === key);
-        if(exists.length > 0){
+        if (exists.length > 0) {
             return true;
         }
-        // DNA
-        switch(key){
-            case AccountKeys.ETH:
-                return ViewMdoelBridge.DNA.genes.crypto.eth === account.toLocaleLowerCase();
-            case AccountKeys.Arweave:
-                return ViewMdoelBridge.DNA.genes.crypto.ar === account;
-            case AccountKeys.Atom:
-                    return ViewMdoelBridge.DNA.genes.crypto.atom === account;
-            case AccountKeys.Solana:
-                return ViewMdoelBridge.DNA.genes.crypto.sol === account;
-            case AccountKeys.Idena:
-                return ViewMdoelBridge.DNA.genes.crypto.idena === account.toLocaleLowerCase();
-        }
-        return false;
+        return ViewMdoelBridge.isInDNA(key, account);
     }
     const addAccount = (key: string, account: string) => {
         const exists = checkTheAdded(key, account);
-        if(exists){
+        if (exists) {
             toast({
                 title: 'Exists!',
                 description: "The same document already exists in DNA or the added/removed ones...",
@@ -105,13 +130,13 @@ export const ManageView = () => {
     const linkEth = async () => {
         await WalletUtility.connectEth("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.ETH),
             async (data: any) => {
-              addAccount(AccountKeys.ETH, data.account);
+                addAccount(AccountKeys.ETH, data.account);
             },
             () => { },
             () => { },
             toast);
     }
-    const linkArweave =async () => {
+    const linkArweave = async () => {
         await WalletUtility.connectArweave("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.Arweave),
             async (data: any) => {
                 addAccount(AccountKeys.Arweave, data.account);
@@ -120,7 +145,7 @@ export const ManageView = () => {
             () => { },
             toast);
     }
-    const linkCosmos =async () => {
+    const linkCosmos = async () => {
         await WalletUtility.connectCosmos("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
             async (data: any) => {
                 addAccount(AccountKeys.Atom, data.account);
@@ -138,15 +163,41 @@ export const ManageView = () => {
             () => { },
             toast);
     }
+    const linkAlgorand = async () => {
+        await WalletUtility.connectAlgo("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.Algorand),
+            async (data: any) => {
+                addAccount(AccountKeys.Algorand, data.account);
+            },
+            () => { },
+            () => { },
+            toast);
+    }
+    const linkBySignature = async (key: string, uri: string) => {
+        if (!uri) {
+            toast({
+                title: 'Error',
+                description: "The request URI is empty.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        setSignAction(SignActions.Link);
+        setVerifyUri(uri);
+        setSigKey(key);
+        onLinkDrawerOpen();
+    }
+
     const checkIdena = async () => {
         setCheckingIdena(true);
-        try{
+        try {
             const res = await axios.get(APIs.CheckLinkIdena + "?dna=" + ViewMdoelBridge.DNA.hash);
             const data = res.data;
-            if(data && data.success === true){
+            if (data && data.success === true) {
                 addAccount(AccountKeys.Idena, data.account);
             }
-            else{
+            else {
                 toast({
                     title: 'Idena Auth',
                     description: "Failed!",
@@ -156,17 +207,32 @@ export const ManageView = () => {
                 });
             }
         }
-        finally{
+        finally {
             setCheckingIdena(false);
         }
     }
+    const tryAddAccount = async (key: string, account: string) => {
+        const uri = APIs.getUri_AddLink(ViewMdoelBridge.DNA.hash, key);
+        WalletUtility.checkAccount(uri, { address: account },
+            async (data: any) => {
+                addAccount(data.key, data.account);
+                switch (data.key) {
+                    case AccountKeys.Bitcoin:
+                        setBtc(data.key);
+                        setEditingBtc("");
+                        break;
+                }
+            },
+            () => { },
+            toast);
+    }
 
     const tryDeleteAccount = () => {
-        if(!deletingKey || deletingKey === ViewData.keyOfPrimaryAccount)
+        if (!deletingKey || deletingKey === ViewData.keyOfPrimaryAccount)
             return;
         const item = new Account2();
         item.key = deletingKey;
-        switch(deletingKey){
+        switch (deletingKey) {
             case AccountKeys.ETH:
                 item.account = eth;
                 setEth("");
@@ -176,16 +242,28 @@ export const ManageView = () => {
                 setAr("");
                 break;
             case AccountKeys.Atom:
-                    item.account = atom;
-                    setAtom("");
-                    break;
+                item.account = atom;
+                setAtom("");
+                break;
             case AccountKeys.Solana:
                 item.account = sol;
                 setSol("");
                 break;
+            case AccountKeys.Algorand:
+                item.account = algo;
+                setAlgo("");
+                break;
             case AccountKeys.Idena:
                 item.account = idena;
                 setIdena("");
+                break;
+            case AccountKeys.Bitcoin:
+                item.account = btc;
+                setBtc("");
+                break;
+            case AccountKeys.NervosCKB:
+                item.account = ckb;
+                setCkb("");
                 break;
         }
         setDeletedAccounts([...deletedAccounts, item]);
@@ -193,8 +271,8 @@ export const ManageView = () => {
         onDeleteAlertClose();
     }
     const restoreAccount = (item: Account2) => {
-        if(!item) return;
-        switch(item.key){
+        if (!item) return;
+        switch (item.key) {
             case AccountKeys.ETH:
                 setEth(item.account);
                 break;
@@ -207,8 +285,17 @@ export const ManageView = () => {
             case AccountKeys.Solana:
                 setSol(item.account);
                 break;
+            case AccountKeys.Algorand:
+                setAlgo(item.account);
+                break;
             case AccountKeys.Idena:
                 setIdena(item.account);
+                break;
+            case AccountKeys.Bitcoin:
+                setBtc(item.account);
+                break;
+            case AccountKeys.NervosCKB:
+                setCkb(item.account);
                 break;
         }
         setDeletedAccounts(deletedAccounts.filter(i => i.key !== item.key || i.account !== item.account));
@@ -226,24 +313,30 @@ export const ManageView = () => {
     }
 
     const drawAccountIcon = (key: string) => {
-        if(!key) return;
-        switch(key){
+        if (!key) return;
+        switch (key) {
             case AccountKeys.ETH:
-                return (<EthIcon m={2}/>);
+                return (<EthIcon m={2} />);
             case AccountKeys.Arweave:
-                return (<ArIcon m={2}/>);
+                return (<ArIcon m={2} />);
             case AccountKeys.Atom:
-                    return (<AtomIcon m={2}/>);
+                return (<AtomIcon m={2} />);
             case AccountKeys.Solana:
-                return (<SolIcon m={2}/>);
+                return (<SolIcon m={2} />);
+            case AccountKeys.Algorand:
+                return (<AlgoIcon m={2} />);
             case AccountKeys.Idena:
-                return (<IdenaIcon m={2}/>);
+                return (<IdenaIcon m={2} />);
+            case AccountKeys.Bitcoin:
+                return (<BtcIcon m={2} />);
+            case AccountKeys.NervosCKB:
+                return (<CkbIcon m={2} />);
         }
     }
 
     const processSignResult = async (data: any) => {
         const index = signers.findIndex(i => i.account === data.account && i.key === data.key);
-        if(index < 0){
+        if (index < 0) {
             toast({
                 title: 'Error!',
                 description: "Unknown error: Success on server, but no data on client...",
@@ -254,9 +347,12 @@ export const ManageView = () => {
         }
         setWorking(signers[index], false, true);
 
-        if(data.needMoreSignature === false){ // finished
+        if (data.needMoreSignature === false) { // finished
+            console.log("Multi-sig finished");
+            console.log(data);
             ViewMdoelBridge.DNA = data.dna;
             ViewMdoelBridge.Cids = data.cids;
+            await ViewMdoelBridge.refreshViewDataByDNA();
             toast({
                 title: 'Done!',
                 description: "Let's have a look at you new DNA O(∩_∩)O",
@@ -265,34 +361,26 @@ export const ManageView = () => {
                 isClosable: true,
             });
             await delay(2000);
+            // TODO: should navigate to Setting page: update Muti-Sig threshold
             navigate(RoutesData.Profile);
         }
     }
     const setWorking = (currentSigner: Account4, working: boolean, status: boolean) => {
-        if(!currentSigner) return;
+        if (!currentSigner) return;
         const tempSigners = signers.filter(i => i.key !== currentSigner.key || i.account !== currentSigner.account);
         setSigners(tempSigners);
         currentSigner.working = working;
         currentSigner.done = status;
-        if(working)
+        if (working)
             setSigners([currentSigner, ...tempSigners]);
         else
             setSigners([...tempSigners, currentSigner]);
     }
-    // const setTaskStatus = (currentSigner: Account4, status: boolean) => {
-    //     if(!currentSigner) return;
-    //     setSigners(signers.filter(i => i.key !== currentSigner.key || i.account !== currentSigner.account));
-    //     currentSigner.done = status;
-    //     if(status)
-    //         setSigners([currentSigner, ...signers]);
-    //     else
-    //         setSigners([...signers, currentSigner]);
-    // }
 
     const sign = async (item: Account4) => {
         // TODO: check
-        if(item.done || item.working) return;
-        if(deletedAccounts.length === 0 && addedAccounts.length ===0){
+        if (item.done || item.working) return;
+        if (deletedAccounts.length === 0 && addedAccounts.length === 0) {
             toast({
                 title: 'No changes',
                 description: "No need to commit.",
@@ -303,9 +391,15 @@ export const ManageView = () => {
             return;
         }
 
-        const message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, item.key, item.account, addedAccounts, deletedAccounts, signers);
+        setCurrentSigner(item);
+        // let message = mutationMsg;
+        // if(message.length === 0){
+        //     message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, item.key, item.account, addedAccounts, deletedAccounts, signers, newMutisigThreshold);
+        //     setMutationMsg(message);
+        // }
+        const message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, item.key, item.account, addedAccounts, deletedAccounts, signers, newMutisigThreshold);
         setWorking(item, true, false);
-        switch(item.key){
+        switch (item.key) {
             case AccountKeys.ETH:
                 await WalletUtility.connectEth(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.ETH),
                     async (data: any) => {
@@ -332,18 +426,18 @@ export const ManageView = () => {
                     },
                     toast);
                 break;
-                case AccountKeys.Atom:
-                    await WalletUtility.connectCosmos(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
-                        async (data: any) => {
-                            await processSignResult(data);
-                        },
-                        () => {
-                            setWorking(item, false, false);
-                        },
-                        () => {
-                            setWorking(item, false, false);
-                        },
-                        toast);
+            case AccountKeys.Atom:
+                await WalletUtility.connectCosmos(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
+                    async (data: any) => {
+                        await processSignResult(data);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    toast);
                 break;
             case AccountKeys.Solana:
                 await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Solana),
@@ -358,9 +452,80 @@ export const ManageView = () => {
                     },
                     toast);
                 break;
+            case AccountKeys.Algorand:
+                await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Algorand),
+                    async (data: any) => {
+                        await processSignResult(data);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    toast);
+                break;
             case AccountKeys.Idena:
                 break;
+            case AccountKeys.Bitcoin:
+                callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Bitcoin), item);
+                break;
+            case AccountKeys.NervosCKB:
+                callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB), item);
+                break;
         }
+    }
+
+    const verifySig = async (account: string, message: string, signature: string) => {
+        if(signAction === SignActions.Link){
+            await WalletUtility.submitSignature(verifyUri, account, message, signature,
+                async (data: any) => {
+                    addAccount(sigKey, account);
+                    onLinkDrawerClose();
+                },
+                () => { },
+                toast);
+        } // link
+        else if(signAction === SignActions.MutiSig){
+            const signer = signers.find(i => i.key === sigKey && i.account === account);
+            if (!signer) return;
+
+            setWorking(signer, true, false);
+            await WalletUtility.submitSignature(verifyUri, account, message, signature,
+                async (data: any) => {
+                    await processSignResult(data);
+                },
+                () => {
+                    setWorking(signer, false, false);
+                },
+                toast);
+        } // multi sig
+    }
+
+    const callMultiSigSignature = async (uri: string, signer: Account4) => {
+        if (!uri) {
+            toast({
+                title: 'Error',
+                description: "The request URI is empty.",
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+        setSignAction(SignActions.MutiSig);
+
+        // let message = mutationMsg;
+        // if(message.length === 0){
+        //     message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, signer.key, signer.account, addedAccounts, deletedAccounts, signers, newMutisigThreshold);
+        //     setMutationMsg(message);
+        // }
+        const message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, signer.key, signer.account, addedAccounts, deletedAccounts, signers, newMutisigThreshold);
+        setMessage(message);
+        setAddress(signer.account);
+        setSigKey(signer.key);
+        setVerifyUri(uri);
+        onLinkDrawerOpen();
     }
 
     // const prepareTwitter = async () => {
@@ -411,89 +576,38 @@ export const ManageView = () => {
     //     }
     // };
 
+    const renderDeleteWrapItem = (title: string, key: string, account: string) => {
+        return (
+            <WrapItem padding="10px">
+                <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
+                    <Heading as='h3' size='lg' color='gray.500' m={2}>{title}</Heading>
+                    <Divider />
+                    <Text height="50px" m={5}>{account}</Text>
+                    <Divider />
+                    <HStack as='h4' m={1} spacing={3}>
+                        <IconButton size='sm' icon={<DeleteIcon />} colorScheme='red' isRound={true}
+                            isDisabled={ViewData.keyOfPrimaryAccount === key || deletedAccounts.length > 0}
+                            onClick={(e) => {
+                                setDeletingKey(key);
+                                onDeleteAlertOpen();
+                            }} aria-label={"Delete"}></IconButton>
+                    </HStack>
+                </Box>
+            </WrapItem>
+        );
+    }
+
     const renderCurrentGenesSection = () => {
         return (
             <Wrap spacing="20px">
-                {eth ? <WrapItem padding="10px">
-                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>ETH | EVM</Heading>
-                        <Divider />
-                        <Text height="50px" m={5}>{eth}</Text>
-                        <Divider />
-                        <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
-                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.ETH || deletedAccounts.length > 0}
-                            onClick={(e) => {
-                                setDeletingKey(AccountKeys.ETH);
-                                onDeleteAlertOpen();
-                            }} aria-label={"Delete"}></IconButton>
-                        </HStack>
-                    </Box>
-                </WrapItem> : null}
-                {ar ? <WrapItem padding="10px">
-                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>Arweave</Heading>
-                        <Divider />
-                        <Text height="50px" m={5}>{ar}</Text>
-                        <Divider />
-                        <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
-                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Arweave || deletedAccounts.length > 0}
-                            onClick={(e) => {
-                                setDeletingKey(AccountKeys.Arweave);
-                                onDeleteAlertOpen();
-                            }} aria-label={"Delete"}></IconButton>
-                        </HStack>
-                    </Box>
-                </WrapItem> : null}
-                {atom ? <WrapItem padding="10px">
-                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>Cosmos</Heading>
-                        <Divider />
-                        <Text height="50px" m={5}>{atom}</Text>
-                        <Divider />
-                        <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
-                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Atom || deletedAccounts.length > 0}
-                            onClick={(e) => {
-                                setDeletingKey(AccountKeys.Atom);
-                                onDeleteAlertOpen();
-                            }} aria-label={"Delete"}></IconButton>
-                        </HStack>
-                    </Box>
-                </WrapItem> : null}
-                {sol ? <WrapItem padding="10px">
-                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>Solana</Heading>
-                        <Divider />
-                        <Text height="50px" m={5}>{sol}</Text>
-                        <Divider />
-                        <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon/>} colorScheme='red' isRound={true}
-                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Solana || deletedAccounts.length > 0}
-                            onClick={(e) => {
-                                setDeletingKey(AccountKeys.Solana);
-                                onDeleteAlertOpen();
-                            }} aria-label={"Delete"}></IconButton>
-                        </HStack>
-                    </Box>
-                </WrapItem> : null}
-                {idena ? <WrapItem padding="10px">
-                    <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                        <Heading as='h3' size='lg' color='gray.500' m={2}>Idena</Heading>
-                        <Divider />
-                        <Text height="50px" m={5}>{idena}</Text>
-                        <Divider />
-                        <HStack as='h4' m={1} spacing={3}>
-                            <IconButton size='sm' icon={<DeleteIcon />} colorScheme='red' isRound={true}
-                            isDisabled={ViewData.keyOfPrimaryAccount === AccountKeys.Idena || deletedAccounts.length > 0}
-                            onClick={(e) => {
-                                setDeletingKey(AccountKeys.Idena);
-                                onDeleteAlertOpen();
-                            }} aria-label={"Delete"}></IconButton>
-                        </HStack>
-                    </Box>
-                </WrapItem> : null}
+                {eth ? renderDeleteWrapItem("ETH | EVM", AccountKeys.ETH, eth) : null}
+                {ar ? renderDeleteWrapItem("Arweave", AccountKeys.Arweave, ar) : null}
+                {atom ? renderDeleteWrapItem("Cosmos", AccountKeys.Atom, atom) : null}
+                {sol ? renderDeleteWrapItem("Solana", AccountKeys.Solana, sol) : null}
+                {algo ? renderDeleteWrapItem("Algorand", AccountKeys.Algorand, algo) : null}
+                {btc ? renderDeleteWrapItem("Bitcoin", AccountKeys.Bitcoin, btc) : null}
+                {ckb ? renderDeleteWrapItem("Nervos", AccountKeys.NervosCKB, ckb) : null}
+                {idena ? renderDeleteWrapItem("Idena", AccountKeys.Idena, idena) : null}
             </Wrap>
         );
     }
@@ -503,41 +617,58 @@ export const ManageView = () => {
                 <AccordionItem>
                     <h2>
                         <AccordionButton>
-                        <Box flex='1' textAlign='left'>Crypto</Box>
+                            <Box flex='1' textAlign='left'>Crypto</Box>
                         </AccordionButton>
                     </h2>
                     <AccordionPanel>
-                        <HStack>
-                            {eth ? null : <Button leftIcon={<EthIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
-                                onClick={linkEth}>ETH | EVM</Button>}
-                            {ar ? null :<Button leftIcon={<ArIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
-                                onClick={linkArweave}>Arweave</Button>}
-                            {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
-                                onClick={linkArweave}>Arweave</Button>}
-                            {sol ? null :<Button leftIcon={<SolIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
-                                onClick={linkSolana}>Solana</Button>}
-                            {idena ? null :<Box height="40px" bgColor="gray.50" padding={1}>
+                        <VStack>
+                            <HStack>
+                                {eth ? null : <Button leftIcon={<EthIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.ETH)}
+                                    onClick={linkEth}>ETH | EVM</Button>}
+                                {/* {ar ? null :<Button leftIcon={<ArIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Arweave)}
+                                    onClick={linkArweave}>Arweave</Button>}
+                                {atom ? null :<Button leftIcon={<AtomIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Atom)}
+                                    onClick={linkCosmos}>Cosmos</Button>} */}
+                                {sol ? null : <Button leftIcon={<SolIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Solana)}
+                                    onClick={linkSolana}>Solana</Button>}
+                                {algo ? null : <Button leftIcon={<AlgoIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Algorand)}
+                                    onClick={linkAlgorand}>Algorand</Button>}
+                                {ckb ? null : <Button leftIcon={<CkbIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.NervosCKB)}
+                                    onClick={(e) => { linkBySignature(AccountKeys.NervosCKB, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB)); }}>Nervos</Button>}
+                            </HStack>
+                            {idena ? null : <Box height="40px" bgColor="gray.50" padding={1}>
                                 <HStack marginLeft={1} marginRight={1} verticalAlign="middle">
                                     <Text fontWeight="bold">Idena: </Text>
                                     <Menu>
                                         <MenuButton as={Button} size='sm' aria-label="Connect" title="Connect" variant="outline"
-                                             disabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)} icon={<LinkIcon/>}>1. Link</MenuButton>
+                                            disabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)} icon={<LinkIcon />}>1. Link</MenuButton>
                                         <MenuList>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaDesktop} target="_blank">Desktop App</MenuItem>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaWeb} target="_blank">Web App</MenuItem>
                                         </MenuList>
                                     </Menu>
-                                    <Button size='sm' leftIcon={<RepeatIcon/>} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)}
+                                    <Button size='sm' leftIcon={<RepeatIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)}
                                         isLoading={checkingIdena} onClick={checkIdena}>2. Check</Button>
                                 </HStack>
                             </Box>}
-                        </HStack>
+                            {/* {btc ? null : <InputGroup m={2}>
+                                <InputLeftAddon children='Bitcoin' />
+                                <Input pr='4.5rem' type="text" placeholder="address" value={editingBtc}
+                                    onChange={(e) => { setEditingBtc(e.target.value); }}
+                                    onKeyUp={(e) => {
+                                        if(e.key === "Enter") { tryAddAccount(AccountKeys.Bitcoin, editingBtc); }
+                                    }}/>
+                                <InputRightElement width='4.5rem'>
+                                    <Button size='sm' onClick={(e) => { tryAddAccount(AccountKeys.Bitcoin, editingBtc); }}>Add</Button>
+                                </InputRightElement>
+                            </InputGroup> } */}
+                        </VStack>
                     </AccordionPanel>
                 </AccordionItem>
                 <AccordionItem>
                     <h2>
                         <AccordionButton>
-                        <Box flex='1' textAlign='left'>Social</Box>
+                            <Box flex='1' textAlign='left'>Social</Box>
                         </AccordionButton>
                     </h2>
                     <AccordionPanel>
@@ -609,19 +740,38 @@ export const ManageView = () => {
             //         </AccordionPanel>
             //     </AccordionItem>
             // </Accordion>
-            <Box m={5} width="600px" height="300px" borderWidth={1} borderColor="green">
+            <Center m={5} width="600px" height="300px" boxShadow='xl' p='6' rounded='md'>
                 <Wrap spacing={2} justify='center'>
-                    {signers.map((item: Account4, index: number) =>(
+                    {signers.map((item: Account4, index: number) => (
                         <WrapItem key={index}>
-                            <Button leftIcon={drawAccountIcon(item.key)}
-                                colorScheme={item.done ? "green" : "cyan"}
-                                isDisabled={item.done}
+                            <Button leftIcon={item.done ? <CheckIcon/> : drawAccountIcon(item.key)}
+                                colorScheme={item.done ? "green" : "twitter"}
                                 isLoading={item.working}
-                                onClick={(e) => {sign(item);}}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
+                                onClick={(e) => { sign(item); }}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
                         </WrapItem>
                     ))}
                 </Wrap>
-            </Box>
+            </Center>
+        );
+    }
+    const renderMutisigThreshold = () => {
+        const newCount = signers.length + addedAccounts.length - deletedAccounts.length;
+        var items = [...Array(newCount)].map((item, index) => index + 1);
+        return (
+            <VStack width="100%" height="500px" justify="center">
+                <Heading as='h4' size='md' m={2}>MultiSig Threshold</Heading>
+                <HStack>
+                    <Select w={24} variant='flushed' placeholder='&nbsp; NotSet' value={newMutisigThreshold}
+                        onChange={(e) => {
+                            const threshold = parseInt(e.target.value);
+                            setNewMutisigThreshold(threshold);
+                        }}>
+                        {items.map((item, index) => <option value={item}>{item}</option> )}
+                    </Select>
+                    <Text>out of {newCount} account(s)</Text>
+                </HStack>
+                <Text m={2}>Current policy is {currentMutisigThreshold} out of {signers.length}</Text>
+            </VStack>
         );
     }
 
@@ -632,11 +782,12 @@ export const ManageView = () => {
         // You need to restrict it at some point
         // This is just dummy code and should be replaced by actual
         checkCache();
-      }, []);
+        getMultisigThreshold();
+    }, []);
 
     return (
         <VStack spacing={4}>
-            <NavBar/>
+            <NavBar />
             <Flex flexDir="column" width="100%">
                 <Steps activeStep={activeStep}>
                     <Step label="Check Unfinished Records">
@@ -662,32 +813,32 @@ export const ManageView = () => {
                                     </TabList>
                                     <TabPanels>
                                         <TabPanel>
-                                        <List spacing={2}>
-                                            {deletedAccounts.map((item: any, index: number) =>(
-                                                <ListItem key={index}>
-                                                    <HStack>
-                                                        {drawAccountIcon(item.key)}
-                                                        <Text>{item.account}</Text>
-                                                        <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon/>} colorScheme="cyan" isRound={true}
-                                                            onClick={() => { restoreAccount(item); }} />
-                                                    </HStack>
-                                                </ListItem>
-                                            ))}
-                                        </List>
+                                            <List spacing={2}>
+                                                {deletedAccounts.map((item: any, index: number) => (
+                                                    <ListItem key={index}>
+                                                        <HStack>
+                                                            {drawAccountIcon(item.key)}
+                                                            <Text>{item.account}</Text>
+                                                            <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon />} colorScheme="cyan" isRound={true}
+                                                                onClick={() => { restoreAccount(item); }} />
+                                                        </HStack>
+                                                    </ListItem>
+                                                ))}
+                                            </List>
                                         </TabPanel>
                                     </TabPanels>
                                 </Tabs>
                             </GridItem>
                         </Grid>
                         {true || deletedAccounts && deletedAccounts.length > 0 ? <Alert status='error'>
-                        <AlertIcon />
+                            <AlertIcon />
                             <Box>
                                 <AlertTitle>Attention!</AlertTitle>
                                 <AlertDescription>
-                                The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
+                                    The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
                                 </AlertDescription>
                             </Box>
-                        </Alert> : null }
+                        </Alert> : null}
                     </Step>
 
                     <Step label="Add">
@@ -709,18 +860,18 @@ export const ManageView = () => {
                                     </TabList>
                                     <TabPanels>
                                         <TabPanel>
-                                        <List spacing={2}>
-                                            {addedAccounts.map((item: any, index: number) =>(
-                                                <ListItem key={index}>
-                                                    <HStack>
-                                                        {drawAccountIcon(item.key)}
-                                                        <Text>{item.account}</Text>
-                                                        <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon/>} colorScheme="red" isRound={true}
-                                                            onClick={() => { deleteFromAdded(item); }} />
-                                                    </HStack>
-                                                </ListItem>
-                                            ))}
-                                        </List>
+                                            <List spacing={2}>
+                                                {addedAccounts.map((item: any, index: number) => (
+                                                    <ListItem key={index}>
+                                                        <HStack>
+                                                            {drawAccountIcon(item.key)}
+                                                            <Text>{item.account}</Text>
+                                                            <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon />} colorScheme="red" isRound={true}
+                                                                onClick={() => { deleteFromAdded(item); }} />
+                                                        </HStack>
+                                                    </ListItem>
+                                                ))}
+                                            </List>
                                         </TabPanel>
                                     </TabPanels>
                                 </Tabs>
@@ -728,11 +879,18 @@ export const ManageView = () => {
                         </Grid>
                     </Step>
 
+                    <Step label="Recombination">
+                        {renderMutisigThreshold()}
+                    </Step>
                     <Step label="Sign to Commit">
                         <VStack width="100%" height="500px" justify="center">
-                            <Box width="100%" padding={5} bgColor="green.300">
+                            {/* <Box width="100%" padding={5} bgColor="green.300">
                                 <Text as="h4" color="white" textAlign="center">⬇⬇⬇ Are you ready? Let's sign one-by-one! ⬇⬇⬇</Text>
-                            </Box>
+                            </Box> */}
+                            <Alert status='info'>
+                                <AlertIcon />
+                                ⬇⬇⬇ Are you ready? Let's sign one-by-one! ⬇⬇⬇
+                            </Alert>
                             {renderSignersSection()}
                         </VStack>
                     </Step>
@@ -740,38 +898,56 @@ export const ManageView = () => {
             </Flex>
             <Flex justify="space-between">
                 <IconButton icon={<ArrowBackIcon />} aria-label={"Previous"} m={2} isRound={true} variant='outline'
-                    isDisabled={activeStep === 0} onClick={prevStep}/>
-                <Spacer/>
+                    isDisabled={activeStep === 0} onClick={prevStep} />
+                <Spacer />
                 <IconButton icon={<ArrowForwardIcon />} aria-label={"Next"} m={2} isRound={true} variant='outline'
-                    isDisabled={nextStepDisabled} onClick={nextStep}/>
+                    isDisabled={activeStep === 4} onClick={nextStep} />
             </Flex>
-            <Footer/>
+            <Footer />
 
             <AlertDialog isCentered
                 isOpen={isDeleteAlertOpen} onClose={onDeleteAlertClose}
-                leastDestructiveRef={cancelRef}>
+                leastDestructiveRef={cancelAlertDialogRef}>
                 <AlertDialogOverlay>
-                <AlertDialogContent>
-                    <AlertDialogHeader fontSize='lg' fontWeight='bold'>
-                    Delete Account
-                    </AlertDialogHeader>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                            Delete Account
+                        </AlertDialogHeader>
 
-                    <AlertDialogBody>
-                    Are you sure?
-                    The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
-                    </AlertDialogBody>
+                        <AlertDialogBody>
+                            Are you sure?
+                            The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
+                        </AlertDialogBody>
 
-                    <AlertDialogFooter>
-                    <Button ref={cancelRef} onClick={onDeleteAlertClose}>
-                        Cancel
-                    </Button>
-                    <Button colorScheme='red' onClick={tryDeleteAccount} ml={3}>
-                        Delete
-                    </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
+                        <AlertDialogFooter>
+                            <Button ref={cancelAlertDialogRef} onClick={onDeleteAlertClose}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme='red' onClick={tryDeleteAccount} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
                 </AlertDialogOverlay>
             </AlertDialog>
+            <Drawer size="lg"
+                isOpen={isLinkDrawerOpen}
+                placement='right'
+                onClose={onLinkDrawerClose}
+                finalFocusRef={btnRefLinkDrawer}>
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton />
+                    <DrawerHeader>Link with signature</DrawerHeader>
+                    <DrawerBody>
+                        <SignatureForm defaultAddress={address} defaultMessage={message} buildMessage={WalletUtility.buildSignContent} onVerify={verifySig} />
+                    </DrawerBody>
+                    <DrawerFooter>
+                        <IconButton icon={<CloseIcon />} aria-label={"Cancel"} m={2} isRound={true} variant='outline'
+                            onClick={onLinkDrawerClose} />
+                    </DrawerFooter>
+                </DrawerContent>
+            </Drawer>
         </VStack>
     );
 }
