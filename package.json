@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.0.9",
-    "@chakra-ui/react": "^2.3.2",
+    "@chakra-ui/react": "^2.4.1",
     "@cosmjs/launchpad": "^0.27.1",
     "@cyberlab/social-verifier": "^2.0.1",
     "@emotion/react": "^11.10.4",

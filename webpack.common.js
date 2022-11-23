@@ -51,7 +51,10 @@ module.exports = {
     }
   },
   optimization: {
-    nodeEnv: false
+    nodeEnv: false,
+    splitChunks: {
+      chunks: 'all'
+    }
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -71,7 +74,7 @@ module.exports = {
   externals: {
   },
   output: {
-    filename: 'did.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, './dist'),
     library: 'RuneBox',
     libraryExport: 'default',

@@ -97,8 +97,7 @@ export const NavBar = () => {
       setDisplayName(ViewData.displayName);
 
       setAccountActivated(true);
-      //navigate(RoutesData.Profile);
-      navigate(RoutesData.Manage);
+      navigate(RoutesData.Nav);
     }
     else {
       if(ViewData.eth){

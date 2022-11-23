@@ -1,5 +1,6 @@
 export const RoutesData = {
     Home: "/hello",
+    Nav: "/hello/nav",
     Profile: "/hello/profile",
     Manage: "/hello/manage",
     Activate: "/hello/activate"

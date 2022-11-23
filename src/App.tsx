@@ -11,6 +11,7 @@ import { ManageView } from "./pages/ManageView"
 import { RoutesData } from "./client/RoutesData"
 import { ActivateView } from "./pages/ActivateView"
 import { StepsStyleConfig as Steps } from 'chakra-ui-steps';
+import { NavView } from "./pages/NavView"
 
 const theme = extendTheme({
   components: {
@@ -39,6 +40,7 @@ export const App = () => {
         <BrowserRouter>
             <Routes>
               <Route path={RoutesData.Activate} element={<ActivateView />} />
+              <Route path={RoutesData.Nav} element={<NavView />} />
               <Route path={RoutesData.Profile} element={<ProfileView />} />
               <Route path={RoutesData.Manage} element={<ManageView />} />
               <Route path="*" element={<HomeView />} />

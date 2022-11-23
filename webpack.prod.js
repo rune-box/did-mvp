@@ -20,5 +20,9 @@ module.exports = merge(common, {
         //"chakra-ui-steps": "chakra-ui-steps",
         //arweave: "arweave",
         ethers: "ethers",
+        //"@cosmjs/amino": "@cosmjs/amino",
+        // "@cosmjs/launchpad": "@cosmjs/launchpad",
+        // "@polkadot/util": "@polkadot/util",
+        // "@polkadot/extension-dapp": "@polkadot/extension-dapp"
     },
 });
