@@ -49,6 +49,7 @@ export const ManageView = () => {
 
     const [currentMutisigThreshold, setCurrentMutisigThreshold] = React.useState(-1);
     const [newMutisigThreshold, setNewMutisigThreshold] = React.useState(-1);
+    const [signedCount, setSignedCount] = React.useState(0);
     const [mutationMsg, setMutationMsg] = React.useState("");
     const [signAction, setSignAction] = React.useState("");
     const [sigKey, setSigKey] = React.useState("");
@@ -346,6 +347,7 @@ export const ManageView = () => {
             });
         }
         setWorking(signers[index], false, true);
+        setSignedCount(arg => arg +1);
 
         if (data.needMoreSignature === false) { // finished
             console.log("Multi-sig finished");
@@ -380,7 +382,8 @@ export const ManageView = () => {
     const sign = async (item: Account4) => {
         // TODO: check
         if (item.done || item.working) return;
-        if (deletedAccounts.length === 0 && addedAccounts.length === 0) {
+        if (deletedAccounts.length === 0 && addedAccounts.length === 0 && 
+            currentMutisigThreshold === newMutisigThreshold) {
             toast({
                 title: 'No changes',
                 description: "No need to commit.",
@@ -741,6 +744,9 @@ export const ManageView = () => {
             //     </AccordionItem>
             // </Accordion>
             <Center m={5} width="600px" height="300px" boxShadow='xl' p='6' rounded='md'>
+                <Box m={5}>
+                    <Heading><Text color="green">{signedCount}</Text> / <Text>{currentMutisigThreshold}</Text></Heading>
+                </Box>
                 <Wrap spacing={2} justify='center'>
                     {signers.map((item: Account4, index: number) => (
                         <WrapItem key={index}>
