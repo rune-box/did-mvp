@@ -744,19 +744,25 @@ export const ManageView = () => {
             //     </AccordionItem>
             // </Accordion>
             <Center m={5} width="600px" height="300px" boxShadow='xl' p='6' rounded='md'>
-                <Box m={5}>
-                    <Heading><Text color="green">{signedCount}</Text> / <Text>{currentMutisigThreshold}</Text></Heading>
-                </Box>
-                <Wrap spacing={2} justify='center'>
-                    {signers.map((item: Account4, index: number) => (
-                        <WrapItem key={index}>
-                            <Button leftIcon={item.done ? <CheckIcon/> : drawAccountIcon(item.key)}
-                                colorScheme={item.done ? "green" : "twitter"}
-                                isLoading={item.working}
-                                onClick={(e) => { sign(item); }}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
-                        </WrapItem>
-                    ))}
-                </Wrap>
+                <VStack>
+                    <Center m={5}>
+                        <Heading>
+                            <HStack>
+                            <Text color="green">{signedCount}</Text><Text> / {currentMutisigThreshold}</Text>
+                            </HStack>
+                        </Heading>
+                    </Center>
+                    <Wrap spacing={2} justify='center'>
+                        {signers.map((item: Account4, index: number) => (
+                            <WrapItem key={index}>
+                                <Button leftIcon={item.done ? <CheckIcon/> : drawAccountIcon(item.key)}
+                                    colorScheme={item.done ? "green" : "twitter"}
+                                    isLoading={item.working}
+                                    onClick={(e) => { sign(item); }}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
+                            </WrapItem>
+                        ))}
+                    </Wrap>
+                </VStack>
             </Center>
         );
     }
