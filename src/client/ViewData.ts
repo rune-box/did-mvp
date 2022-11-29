@@ -31,6 +31,8 @@ export const ViewData = {
 
     activated: false,
     afterActivated: () => {},
+
+    countOfPerPage: 20,
 };
 
 export const EmptyDNA = {
@@ -72,6 +74,12 @@ export class ViewMdoelBridge {
     static ENSContext: ENSContext;
     static DotbitContext: DotbitContext;
 
+    static LastDataSnapshot = {
+        cids: EmptyCids,
+        CreatedBy: "",
+        createdAt: 0
+    };
+
     static getAccount3 = (key: string, account: string): Account4 | null => {
         if(!key || !account)
             return null;
@@ -83,7 +91,7 @@ export class ViewMdoelBridge {
         };
     }
 
-    static getSigners = () => {
+    static getSigners = (skipSig: boolean = false) => {
         const signers = new Array<Account4>();
         const crypto = ViewMdoelBridge.DNA.genes.crypto;
 
@@ -105,11 +113,13 @@ export class ViewMdoelBridge {
         const algo = ViewMdoelBridge.getAccount3(AccountKeys.Algorand, crypto.algo);
         if(algo) signers.push(algo);
 
-        const btc = ViewMdoelBridge.getAccount3(AccountKeys.Bitcoin, crypto.btc);
-        if(btc) signers.push(btc);
+        if(!skipSig){
+            const btc = ViewMdoelBridge.getAccount3(AccountKeys.Bitcoin, crypto.btc);
+            if(btc) signers.push(btc);
 
-        const ckb = ViewMdoelBridge.getAccount3(AccountKeys.NervosCKB, crypto.ckb);
-        if(ckb) signers.push(ckb);
+            const ckb = ViewMdoelBridge.getAccount3(AccountKeys.NervosCKB, crypto.ckb);
+            if(ckb) signers.push(ckb);
+        }
 
         // Idena doesn't support Signature now.
         // const idena = ViewMdoelBridge.getAccount2(AccountKeys.Idena, crypto.idena);

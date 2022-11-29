@@ -1,5 +1,7 @@
 
 export class Utility {
+    static secondsOf24Hours = 86400;
+
     public static generatePlainUUID(): string {
         let id = "";
         if(crypto){
@@ -81,4 +83,9 @@ export class Utility {
     //     return "n/a";
     // }
 
+    static getTimestamp(){
+        const now = new Date();
+        const timestampInSeconds = Math.floor(now.getTime() / 1000);
+        return timestampInSeconds;
+    }
 }

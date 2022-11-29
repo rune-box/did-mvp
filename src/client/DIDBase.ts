@@ -4,6 +4,19 @@ export class DIDBase{
     avatar: string = "";
 }
 
+export class DIDKeys {
+    static ETH_EIP155 = "did:pkh:eip155:1";
+    static ETH_SLIP0044 = "did:pkh:slip0044:60";
+    static Arweave_SLIP0044 = "did:pkh:slip0044:472";
+    static Cosmos_SLIP0044 = "did:pkh:slip0044:118";
+    static Polkadot_SLIP0044 = "did:pkh:slip0044:354";
+    static Solana_SLIP0044 = "did:pkh:slip0044:501";
+    static Idena_SLIP0044 = "did:pkh:slip0044:515";
+    static BTC_SLIP0044 = "did:pkh:slip0044:0";
+    static CKB_SLIP0044 = "did:pkh:slip0044:309";
+    static Algorand_SLIP0044 = "did:pkh:slip0044:283";
+}
+
 export class DIDUtility {
     static isSame(dotbit: string, ens: string){
         if(!dotbit || !ens) return false;

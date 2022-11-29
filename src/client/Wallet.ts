@@ -10,9 +10,11 @@ import { stringToHex } from "@polkadot/util";
 import { AccountKeys } from "./Constants";
 import MyAlgoConnect from "@randlabs/myalgo-connect";
 import { ViewData, ViewMdoelBridge } from "./ViewData";
+import { ImprintItem } from "../models/DataRune";
+import { DataRuneUtility } from "../utils/DataRuneUtility";
 
 export class WalletUtility {
-    static buildSignContent (account: string) {
+    static buildSignContent (account: string): string {
         //const nonce = getCookie(CookieKeys.EthSignInNonce);
         const data = {
             account: account,
@@ -24,7 +26,7 @@ export class WalletUtility {
 
     static buildSignContent_MutateDNA (dna: string, key: string, account: string,
         addedAccounts: Array<Account2>, removedAccounts: Array<Account2>, signers: Array<Account4>,
-        recombinationThreshold: number) {
+        recombinationThreshold: number): string {
         //const nonce = getCookie(CookieKeys.EthSignInNonce);
         const data = {
             signer: {
@@ -41,8 +43,22 @@ export class WalletUtility {
         };
         return JSON.stringify(data);
     }
+    static buildSignContent_DataSnapshot(dna: string, signer: Account4, imprints: Array<ImprintItem>): string{
+        const hash = DataRuneUtility.keccak256(imprints);
+        const data = {
+            signer: {
+                key: signer.key,
+                account: signer.account
+            },
+            dna: dna,
+            data: JSON.stringify(imprints),
+            dataHash: hash,
+            timestamp: Date.now()
+        };
+        return JSON.stringify(data);
+    }
     
-    static buildCheckIdenaContent() {
+    static buildCheckIdenaContent(): string {
         const data = {
             message: "Check the result of Connection with DNA.",
             timestamp: Date.now()

@@ -1,6 +1,6 @@
 import { AppSettings } from "../client/AppData";
 
-const APIPrefix_Runebox = AppSettings.APIPrefix; //"https://localhost:7153/v0/"; //"https://api.runebox.xyz/v0/"; // 
+const APIPrefix_Runebox = AppSettings.APIPrefix;
 const queryPart = "&address=";
 
 export const APIs = {
@@ -18,7 +18,8 @@ export const APIs = {
     //Mutate: "/dna/mutate",
     //SignMutation: "/dna/sign-mutation",
     Save: "/dna/save",
-    RefreshCIDs: "/dna/refresh-cids-by-eth",
+    RefreshCIDsOfDNA: "/dna/refresh-cids-by-eth",
+    RefreshCIDsOfCyberMark: "/cyber-mark/refresh-cids",
 
     getUri_AddLink: (dna: string, key: string) => {
         return `/dna/add/${dna}/${key}`;
@@ -37,6 +38,21 @@ export const APIs = {
         const prefix = "/connect/wallet/";
         return uri.substring(prefix.length);
     },
+
+    getUri_SearchDataRunes: (q: string, page: number) => {
+        const query = !q ? "" : encodeURIComponent(q);
+        return `/data-rune/search?q=${query}&page=${page}`;
+    },
+
+    getUri_GetLastSnapshotTime: (dna: string) => {
+        return `/cyber-mark/get-last-snapshot-time/${dna}`;
+    },
+    getUri_Snapshot: (dna: string, key: string) => {
+        return `/cyber-mark/snapshot/${dna}/${key}`;
+    },
+    getUri_SnapshotDataReady: (dna: string, key: string, account: string) => {
+        return `${APIPrefix_Runebox}robot/cache-is-ready/${dna}/${key}?account=${account}`;
+    },
 };
 
 export const APIsData = {
@@ -46,6 +62,7 @@ export const APIsData = {
         //     "title": "Discord is verified - Galxe",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=e2bcbdfac5ca45ccb57cf0c030a1acdc" + queryPart,
@@ -69,6 +86,7 @@ export const APIsData = {
         //     "title": "Github is verified - Galxe",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=95b868a0799b4cb5995714d74a025024" + queryPart,
@@ -92,6 +110,7 @@ export const APIsData = {
         //     "title": "Twitter is verified - Galxe",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=21f24a2edbe849e5a9303ca9e7f4abcc" + queryPart,
@@ -115,6 +134,7 @@ export const APIsData = {
         //     "title": "Email is verified - Galxe",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=3e864bd2f55447739274e16c476f0e3e" + queryPart,
@@ -138,6 +158,7 @@ export const APIsData = {
         //     "title": "Galxe ID",
         //     "description": "",
         //     "dataType": "text",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/galxe/fetch-item?rune=" + queryPart,
@@ -162,6 +183,8 @@ export const APIsData = {
             "title": "Score on EthRank",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "products/ethrank/fetch-item?rune=3a09559978574ecdb29380b0309752f1" + queryPart,
@@ -184,6 +207,8 @@ export const APIsData = {
             "title": "Score on Goodghosting",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "products/goodghosting/fetch-item?rune=a3353d6bac6c49488cad5a32f4a0e280" + queryPart,
@@ -206,6 +231,8 @@ export const APIsData = {
             "title": "Score on RociFi",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "products/rocifi/fetch-item?rune=c960e67a5f124afcbe97e04c48058f8c" + queryPart,
@@ -228,6 +255,7 @@ export const APIsData = {
         //     "title": "Assets Balance of All Chains - USD (EVM | Debank)",
         //     "description": "",
         //     "dataType": "double",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/debank/fetch-item?rune=43a6c3b30dac45e5ab7e249eb0a2d6dc&address=",
@@ -251,6 +279,7 @@ export const APIsData = {
         //     "title": "Debank Account ID",
         //     "description": "",
         //     "dataType": "text",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/debank/fetch-item?rune=898a1a12345c437a811c9253af45b085&address=",
@@ -272,6 +301,8 @@ export const APIsData = {
             "title": "Debank Score",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "products/debank/fetch-item?rune=a2a28e84339a4afaaf4e05672e14f3db&address=",
@@ -293,6 +324,7 @@ export const APIsData = {
         //     "title": "Email is verified - Debank",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/debank/fetch-item?rune=f0e38b7f7a0a444da55723ca1ac8175c&address=",
@@ -313,6 +345,7 @@ export const APIsData = {
         //     "title": "Is a Mirror author - Debank",
         //     "description": "",
         //     "dataType": "boolean",
+        //     "accountType": "did:pkh:slip0044:60",
         //     "apis": [
         //         {
         //             "uri": APIPrefix_Runebox + "products/debank/fetch-item?rune=2780535a9b534689a77fb918bb7d3067&address=",
@@ -334,6 +367,8 @@ export const APIsData = {
             "title": "Has a BAB token (BNB)",
             "description": "",
             "dataType": "boolean",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/bnb/fetch-item?rune=eeaddc282ac140008ee962a7bd33e7ae" + queryPart,
@@ -359,6 +394,8 @@ export const APIsData = {
             "title": "Txs Count - 7D (BNB)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/bnb/fetch-item?rune=3d1c524a5afa428c8e2d014305ddfada" + queryPart,
@@ -383,6 +420,8 @@ export const APIsData = {
             "title": "Age in days (BNB)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/bnb/fetch-item?rune=b6e10a1d92674063ae0eb6bf7029928a" + queryPart,
@@ -406,6 +445,8 @@ export const APIsData = {
             "title": "Age in days (Polygon)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/polygon/fetch-item?rune=a81a1f9023ac4db7840c4ae58cd8de9b" + queryPart,
@@ -428,6 +469,8 @@ export const APIsData = {
             "title": "Txs Count - 7D (Polygon)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/polygon/fetch-item?rune=16e548f9674e4597a12104872fcdbb66" + queryPart,
@@ -451,6 +494,8 @@ export const APIsData = {
             "title": "Txs Count - 7D (Ethereum)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/ethereum/fetch-item?rune=cd1e8e478115408686ad2bb3de7f75f2&address=",
@@ -472,6 +517,8 @@ export const APIsData = {
             "title": "Age in days (Ethereum)",
             "description": "",
             "dataType": "double",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/ethereum/fetch-item?rune=746fd165da4543ca9e3643cba5d415bb&address=",
@@ -492,6 +539,8 @@ export const APIsData = {
             "title": "Count of Blue Chip NFTs (Ethereum)",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:60",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/ethereum/fetch-item?rune=a511be6bc4dd4221a492cd0506b2d0f6&address=",
@@ -516,6 +565,8 @@ export const APIsData = {
             "title": "Count of Qualified Flips (Idena)",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:515",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/idena/fetch-item?rune=6ca1a6a0962d4b7ab8dc144e630d4e85" + queryPart,
@@ -539,6 +590,8 @@ export const APIsData = {
             "title": "Identity Age (Idena)",
             "description": "",
             "dataType": "integer",
+            "accountType": "did:pkh:slip0044:515",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/idena/fetch-item?rune=2bd3028927804e7ab2f08a0339a6290c" + queryPart,
@@ -562,6 +615,8 @@ export const APIsData = {
             "title": "Identity State (Idena)",
             "description": "",
             "dataType": "text",
+            "accountType": "did:pkh:slip0044:515",
+            "state": "working",
             "apis": [
                 {
                     "uri": APIPrefix_Runebox + "chains/idena/fetch-item?rune=5b2a4888875e4cd9a2370947bfc1d253" + queryPart,

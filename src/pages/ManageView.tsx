@@ -8,12 +8,14 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AccountKeys } from "../client/Constants";
 import { RoutesData } from "../client/RoutesData";
+import { drawAccountIcon } from "../client/UIFunctions";
 //import { CeramicContext } from "../client/CeramicContext";
 import { ViewData, ViewMdoelBridge } from "../client/ViewData";
 import { WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { SignatureForm } from "../components/SignatureForm";
+import { SignersSection } from "../components/SignersSection";
 import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, EthIcon, IdenaIcon, SolIcon } from "../icons/Icons";
 import { Account2, Account4 } from "../models/Account";
 import { SignActions } from "../models/Actions";
@@ -72,9 +74,7 @@ export const ManageView = () => {
 
     const namespace = "runebox";
     const checkCache = async () => {
-        //test
-        // console.log("Signers:");
-        // console.log(signers);
+        //TODO
 
         setNextStepDisabled(false);
     }
@@ -311,28 +311,6 @@ export const ManageView = () => {
     }
     const deleteFromAdded = (item: Account2) => {
         setAddedAccounts(addedAccounts.filter(i => i.key !== item.key || i.account !== item.account));
-    }
-
-    const drawAccountIcon = (key: string) => {
-        if (!key) return;
-        switch (key) {
-            case AccountKeys.ETH:
-                return (<EthIcon m={2} />);
-            case AccountKeys.Arweave:
-                return (<ArIcon m={2} />);
-            case AccountKeys.Atom:
-                return (<AtomIcon m={2} />);
-            case AccountKeys.Solana:
-                return (<SolIcon m={2} />);
-            case AccountKeys.Algorand:
-                return (<AlgoIcon m={2} />);
-            case AccountKeys.Idena:
-                return (<IdenaIcon m={2} />);
-            case AccountKeys.Bitcoin:
-                return (<BtcIcon m={2} />);
-            case AccountKeys.NervosCKB:
-                return (<CkbIcon m={2} />);
-        }
     }
 
     const processSignResult = async (data: any) => {
@@ -721,28 +699,6 @@ export const ManageView = () => {
 
     const renderSignersSection = () => {
         return (
-            // <Accordion defaultIndex={0} m={5} minWidth="600px" minHeight="200px">
-            //     <AccordionItem>
-            //         <h2>
-            //             <AccordionButton>
-            //             <Box flex='1' textAlign='left'>Multi-Sign to Mutate (Save)</Box>
-            //             </AccordionButton>
-            //         </h2>
-            //         <AccordionPanel>
-            //             <Wrap spacing={2} justify='center'>
-            //                 {signers.map((item: Account4, index: number) =>(
-            //                     <WrapItem key={index}>
-            //                         <Button leftIcon={drawAccountIcon(item.key)}
-            //                             colorScheme={item.done ? "green" : "cyan"}
-            //                             isDisabled={item.done}
-            //                             isLoading={item.working}
-            //                             onClick={(e) => {sign(item);}}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
-            //                     </WrapItem>
-            //                 ))}
-            //             </Wrap>
-            //         </AccordionPanel>
-            //     </AccordionItem>
-            // </Accordion>
             <Center m={5} width="600px" height="300px" boxShadow='xl' p='6' rounded='md'>
                 <VStack>
                     <Center m={5}>
@@ -752,16 +708,7 @@ export const ManageView = () => {
                             </HStack>
                         </Heading>
                     </Center>
-                    <Wrap spacing={2} justify='center'>
-                        {signers.map((item: Account4, index: number) => (
-                            <WrapItem key={index}>
-                                <Button leftIcon={item.done ? <CheckIcon/> : drawAccountIcon(item.key)}
-                                    colorScheme={item.done ? "green" : "twitter"}
-                                    isLoading={item.working}
-                                    onClick={(e) => { sign(item); }}>{WalletUtility.getTitleByAccountKey(item.key)}</Button>
-                            </WrapItem>
-                        ))}
-                    </Wrap>
+                    <SignersSection signers={signers} sign={sign} />
                 </VStack>
             </Center>
         );

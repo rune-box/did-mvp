@@ -25,15 +25,15 @@ import { DataPart } from "../DataPart";
 type CardDataType = {
     cardType: string;
     id: string;
-    name: string ;
+    title: string ;
     data: number | string | boolean;
     updated: string;
 }
 
-export const CardRenderer = ({cardType, id, name, data, updated}: CardDataType) => {
+export const CardRenderer = ({cardType, id, title, data, updated}: CardDataType) => {
     return (
         <Box w='360px' h='300px' borderWidth='1px' borderRadius='lg' overflow='hidden'>
-            <Heading as='h3' size='lg' color='gray.500' m={2}>{name}</Heading>
+            <Heading as='h3' size='lg' color='gray.500' m={2}>{title}</Heading>
             <Divider />
             <Center h='200px' fontWeight='semibold'>
                 <DataPart cardType={cardType} data={data} />
@@ -83,6 +83,6 @@ export const SimpleCard = ({address, rune}: QueryProps) => {
       }, []);
     
     return (
-        <CardRenderer cardType={cardType} id={id} name={title} data={data} updated={updated}></CardRenderer>
+        <CardRenderer cardType={cardType} id={id} title={title} data={data} updated={updated}></CardRenderer>
     );
 }

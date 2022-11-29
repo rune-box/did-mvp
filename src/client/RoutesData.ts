@@ -3,6 +3,7 @@ export const RoutesData = {
     Nav: "/hello/nav",
     Profile: "/hello/profile",
     Manage: "/hello/manage",
+    CyberMark: "/hello/cyber-mark",
     Activate: "/hello/activate"
 }
 

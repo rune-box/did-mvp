@@ -1,8 +1,12 @@
 import { Box, Heading, LinkBox, LinkOverlay, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import { Link as ReactLink, useNavigate } from 'react-router-dom';
 import { RoutesData } from "../client/RoutesData";
+import { ViewData, ViewMdoelBridge } from "../client/ViewData";
+import { SnapshotCard } from "../components/AccountInfo";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
+import { CIDs } from "../models/CIDs";
+import { APIs } from "../services/APIs";
 
 export const NavView = () => {
     return (
@@ -27,6 +31,27 @@ export const NavView = () => {
                         <Text>Add/Remove accounts; Update multisig threshold.</Text>
                     </LinkBox>
                 </WrapItem>
+                <WrapItem>
+                    <LinkBox as="article" maxW='sm' p='5' borderWidth='1px' rounded='md' width="300px" height="200px">
+                        <Box as='time'></Box>
+                        <Heading size='md' my='2'>
+                            <LinkOverlay as={ReactLink} to={RoutesData.CyberMark}>Cyber Mark</LinkOverlay>
+                        </Heading>
+                        <Text>Create a snapshot to protect your cyber marks.</Text>
+                    </LinkBox>
+                </WrapItem>
+            </Wrap>
+            <Wrap spacing="20px">
+                <SnapshotCard title="DNA Snapshot"
+                    cids={ViewMdoelBridge.Cids}
+                    shouldRefresh={() => !ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10 }
+                    getRefreshURI={() => APIs.RefreshCIDsOfDNA + "?eth=" + ViewData.eth}
+                    updateCids={(newCids: CIDs) => { ViewMdoelBridge.Cids = newCids; }}/>
+                {ViewMdoelBridge.LastDataSnapshot.createdAt > 999 ? <SnapshotCard title="Cyber Mark (Data Snapshot)"
+                    cids={ViewMdoelBridge.LastDataSnapshot.cids}
+                    shouldRefresh={() => !ViewMdoelBridge.LastDataSnapshot.cids.arweave || ViewMdoelBridge.LastDataSnapshot.cids.arweave.length < 10 }
+                    getRefreshURI={() => APIs.RefreshCIDsOfCyberMark + "?dna=" + ViewMdoelBridge.DNA.hash}
+                    updateCids={(newCids: CIDs) => { ViewMdoelBridge.LastDataSnapshot.cids = newCids; }}/> : null}
             </Wrap>
             <Footer />
         </VStack>

@@ -383,6 +383,7 @@ export const NavBar = () => {
               {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.eth || accountActivated ? "hidden" : "visible"}>Activate</Link> */}
               {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
               {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Profile}>Profile</Link> : null}
+              {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Nav}>Navigation</Link> : null}
             </HStack>
           </HStack>
 
