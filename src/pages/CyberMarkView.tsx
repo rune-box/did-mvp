@@ -237,6 +237,19 @@ export const CyberMarkView = () => {
         const res = await axios.get(uri);
         const data = res.data;
         if(data.success){
+            // need refresh CIDs
+            if(data.needRefreshCids === true){
+                toast({
+                    title: 'Attention!',
+                    description: "You should refresh CIDs of CyberMark first. Let's go to Navigation page to refresh it!",
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                navigate(RoutesData.Nav);
+                return;
+            }
+            // check last Snapshot Time
             const lastTime = data.lastSnapshotTime as number;//Utility.getTimestamp();//
             const shouldTime = lastTime + Utility.secondsOf24Hours;
             const now = Utility.getTimestamp();
@@ -244,6 +257,7 @@ export const CyberMarkView = () => {
                 setAllowedTime(shouldTime);
                 return;
             }
+            // start fetching tasks
             setStartTime(st => now);
             const runes = await loadRunes();
             await startTasks(runes._evmTasks, runes._idenaTasks);
