@@ -44,15 +44,16 @@ export class WalletUtility {
         return JSON.stringify(data);
     }
     static buildSignContent_DataSnapshot(dna: string, signer: Account4, imprints: Array<ImprintItem>): string{
-        const hash = DataRuneUtility.keccak256(imprints);
+        //const hash = DataRuneUtility.keccak256(imprints);
         const data = {
             signer: {
                 key: signer.key,
                 account: signer.account
             },
             dna: dna,
-            data: JSON.stringify(imprints),
-            dataHash: hash,
+            //data: JSON.stringify(imprints),
+            //dataHash: hash,
+            count: imprints.length,
             timestamp: Date.now()
         };
         return JSON.stringify(data);

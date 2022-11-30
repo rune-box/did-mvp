@@ -113,10 +113,12 @@ type SnapshotCardProps = {
 export const SnapshotCard = ({title, cids, shouldRefresh, getRefreshURI, updateCids}: SnapshotCardProps) => {
     const [canRefresh, setCanRefresh] = React.useState(shouldRefresh());
     const [refreshing, setRefreshing] = React.useState(false);
+    const [arweave, setArweave] = React.useState(`https://arweave.net/${cids.arweave}`);
+    const [ipfs, setIpfs] = React.useState(`https://${cids.ipfs}.ipfs.4everland.io/`);
     const toast = useToast();
     
-    const arweave = `https://arweave.net/${cids.arweave}`;
-    const ipfs = `https://${cids.ipfs}.ipfs.4everland.io/`;
+    //const arweave = `https://arweave.net/${cids.arweave}`;
+    //const ipfs = `https://${cids.ipfs}.ipfs.4everland.io/`;
     const refreshCids = async () => {
         try{
             setRefreshing(true);
@@ -133,6 +135,7 @@ export const SnapshotCard = ({title, cids, shouldRefresh, getRefreshURI, updateC
                     isClosable: true,
                 });
                 updateCids(data1.cids);
+                setArweave(old => `https://arweave.net/${data1.cids.arweave}`);
                 setCanRefresh(false);
             }
             else{

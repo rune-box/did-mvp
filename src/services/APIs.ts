@@ -50,8 +50,8 @@ export const APIs = {
     getUri_Snapshot: (dna: string, key: string) => {
         return `/cyber-mark/snapshot/${dna}/${key}`;
     },
-    getUri_SnapshotDataReady: (dna: string, key: string, account: string) => {
-        return `${APIPrefix_Runebox}robot/cache-is-ready/${dna}/${key}?account=${account}`;
+    getUri_SnapshotDataReady: (dna: string, key: string, account: string, startTime: number) => {
+        return `${APIPrefix_Runebox}robot/cache-is-ready/${dna}/${key}?account=${account}&start=${startTime}`;
     },
 };
 

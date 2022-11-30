@@ -23,6 +23,7 @@ import { Utility } from "../utils/Utility";
 
 export const CyberMarkView = () => {
     const [signers, setSigners] = React.useState(ViewMdoelBridge.getSigners(true));
+    const [startTime, setStartTime] = React.useState(0);
     const [evmTasks, setEvmTasks] = React.useState(new Array<DataRuneTask>());
     const [evmFinishedCount, setEvmFinishedCount] = React.useState(0);
     const [idenaTasks, setIdenaTasks] = React.useState(new Array<DataRuneTask>());
@@ -243,6 +244,7 @@ export const CyberMarkView = () => {
                 setAllowedTime(shouldTime);
                 return;
             }
+            setStartTime(st => now);
             const runes = await loadRunes();
             await startTasks(runes._evmTasks, runes._idenaTasks);
         }
@@ -285,7 +287,7 @@ export const CyberMarkView = () => {
             return;
         }
         // server cache is ready?
-        let apiCacheReady = APIs.getUri_SnapshotDataReady(ViewMdoelBridge.DNA.hash, AccountKeys.ETH, ViewData.eth);
+        let apiCacheReady = APIs.getUri_SnapshotDataReady(ViewMdoelBridge.DNA.hash, AccountKeys.ETH, ViewData.eth, startTime);
         const result = await fetch(apiCacheReady, {method: "GET"})
             .then(data => data.json());
         if(!result.success){
@@ -302,9 +304,9 @@ export const CyberMarkView = () => {
 
         const imprints = DataRuneUtility.getData(evmTasks, idenaTasks);
         // check 2
-        const hash = DataRuneUtility.keccak256(imprints);
-        console.log("Client data hash: " + hash);
-        console.log("Server data hash: " + cacheHash);
+        // const hash = DataRuneUtility.keccak256(imprints);
+        // console.log("Client data hash: " + hash);
+        // console.log("Server data hash: " + cacheHash);
         // if(hash !== cacheHash){
         //     toast({
         //         title: 'Not same data!',
@@ -423,10 +425,7 @@ export const CyberMarkView = () => {
         // This is just dummy code and should be replaced by actual
         prepare();
     }, []);
-    // ({evmFinishedCount} / {evmTasks.length})
-    // ({idenaFinishedCount} / {idenaTasks.length})
-    // {/* <DataPart cardType={item.rune.dataType} data={item.data} /> */}
-    // {typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}
+
     return ( allowedTime > 0 ? renderWaitingComponent() :
         <VStack spacing={4}>
             <NavBar />
