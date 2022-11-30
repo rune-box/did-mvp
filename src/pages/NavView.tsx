@@ -2,7 +2,7 @@ import { Box, Heading, LinkBox, LinkOverlay, Text, VStack, Wrap, WrapItem } from
 import { Link as ReactLink, useNavigate } from 'react-router-dom';
 import { RoutesData } from "../client/RoutesData";
 import { ViewData, ViewMdoelBridge } from "../client/ViewData";
-import { SnapshotCard } from "../components/AccountInfo";
+import { SnapshotCard, SnapshotsCards } from "../components/AccountInfo";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { CIDs } from "../models/CIDs";
@@ -41,18 +41,7 @@ export const NavView = () => {
                     </LinkBox>
                 </WrapItem>
             </Wrap>
-            <Wrap spacing="20px">
-                <SnapshotCard title="DNA Snapshot"
-                    cids={ViewMdoelBridge.Cids}
-                    shouldRefresh={() => !ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10 }
-                    getRefreshURI={() => APIs.RefreshCIDsOfDNA + "?eth=" + ViewData.eth}
-                    updateCids={(newCids: CIDs) => { ViewMdoelBridge.Cids = newCids; }}/>
-                {ViewMdoelBridge.LastDataSnapshot.createdAt > 999 ? <SnapshotCard title="Cyber Mark (Data Snapshot)"
-                    cids={ViewMdoelBridge.LastDataSnapshot.cids}
-                    shouldRefresh={() => !ViewMdoelBridge.LastDataSnapshot.cids.arweave || ViewMdoelBridge.LastDataSnapshot.cids.arweave.length < 10 }
-                    getRefreshURI={() => APIs.RefreshCIDsOfCyberMark + "?dna=" + ViewMdoelBridge.DNA.hash}
-                    updateCids={(newCids: CIDs) => { ViewMdoelBridge.LastDataSnapshot.cids = newCids; }}/> : null}
-            </Wrap>
+            <SnapshotsCards />
             <Footer />
         </VStack>
     );

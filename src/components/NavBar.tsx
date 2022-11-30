@@ -91,6 +91,7 @@ export const NavBar = () => {
 
       ViewMdoelBridge.DNA = data.dna;
       ViewMdoelBridge.Cids = data.cids;
+      ViewMdoelBridge.LastDataSnapshot = data.cybermarkSnapshot;
       ViewMdoelBridge.DotbitContext = new DotbitContext();
 
       await ViewMdoelBridge.refreshViewDataByDNA();
@@ -382,8 +383,8 @@ export const NavBar = () => {
               <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
               {/* <Link as={ReactLink} to={RoutesData.Activate} visibility={!ViewData.eth || accountActivated ? "hidden" : "visible"}>Activate</Link> */}
               {/* <Link as={ReactLink} to={RoutesData.Manage} visibility={ViewData.eth && ViewData.activated ? "visible" : "hidden"}>Manage</Link> */}
-              {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Profile}>Profile</Link> : null}
               {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Nav}>Navigation</Link> : null}
+              {ViewData.loggedIn && accountActivated ? <Link as={ReactLink} to={RoutesData.Profile}>Profile</Link> : null}
             </HStack>
           </HStack>
 

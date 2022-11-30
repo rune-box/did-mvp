@@ -438,25 +438,17 @@ export const CyberMarkView = () => {
                                 <Heading size='md'>{item.rune.title}</Heading>
                             </CardHeader>
                             <CardBody>
-                                {/* <Stack divider={<StackDivider />} spacing='4'>
+                                <Stack divider={<StackDivider />} spacing='4'>
                                     <Box>
                                         <Heading size='xs' textTransform='uppercase'>description</Heading>
                                         <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
                                     </Box>
+                                    <Divider m={3}/>
                                     {item.finished ? <Box>
                                         <Heading size='xs' textTransform='uppercase'>data</Heading>
-                                        <Text pt='2' fontSize='sm'>{item.data}</Text>
+                                        <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
                                     </Box> : null}
-                                </Stack> */}
-                                <Box>
-                                    <Heading size='xs' textTransform='uppercase'>description</Heading>
-                                    <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
-                                </Box>
-                                <Divider m={3}/>
-                                {item.finished ? <Box>
-                                    <Heading size='xs' textTransform='uppercase'>data</Heading>
-                                    <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
-                                </Box> : null}
+                                </Stack>
                             </CardBody>
                             <CardFooter>
                                 <Button isLoading={item.isLoading} isDisabled={item.finished} leftIcon={<RepeatIcon/>}
@@ -475,15 +467,17 @@ export const CyberMarkView = () => {
                                 <Heading size='md'>{item.rune.title}</Heading>
                             </CardHeader>
                             <CardBody>
-                                <Box>
-                                    <Heading size='xs' textTransform='uppercase'>description</Heading>
-                                    <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
-                                </Box>
-                                <Divider m={3}/>
-                                {item.finished ? <Box>
-                                    <Heading size='xs' textTransform='uppercase'>data</Heading>
-                                    <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
-                                </Box> : null}
+                                <Stack divider={<StackDivider />} spacing='4'>
+                                    <Box>
+                                        <Heading size='xs' textTransform='uppercase'>description</Heading>
+                                        <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
+                                    </Box>
+                                    <Divider m={3}/>
+                                    {item.finished ? <Box>
+                                        <Heading size='xs' textTransform='uppercase'>data</Heading>
+                                        <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
+                                    </Box> : null}
+                                </Stack>
                             </CardBody>
                             <CardFooter>
                                 <Button isLoading={item.isLoading} isDisabled={item.finished} leftIcon={<RepeatIcon/>}
@@ -495,8 +489,6 @@ export const CyberMarkView = () => {
             </Wrap> : null}
             <Divider m={3} />
             <Center>
-                {/* <Button colorScheme="twitter" size="lg" m={10} leftIcon={<FingerprintIcon/>}
-                    isDisabled={evmFinishedCount < evmTasks.length || idenaFinishedCount < idenaTasks.length}>Create Cyber Mark (Data Snapshot)</Button> */}
                 <VStack spacing={5}>
                     <Center>
                         <Heading>Create Cyber Mark (Data Snapshot)</Heading>

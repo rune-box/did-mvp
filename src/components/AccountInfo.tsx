@@ -1,5 +1,5 @@
 import { ExternalLinkIcon, RepeatIcon } from "@chakra-ui/icons";
-import { Avatar, Box, Center, Highlight, IconButton, Link, Mark, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Avatar, Box, Card, CardBody, CardFooter, CardHeader, Center, Heading, Highlight, IconButton, Link, Mark, Stack, StackDivider, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
 import React from "react";
@@ -13,15 +13,25 @@ type QrcodeCardProps = {
 }
 export const QrcodeCard = ({data, title}: QrcodeCardProps) => {
     return (
-        <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-            <Center>
-                <Text fontWeight="bold" m={2}>{title}</Text>
-            </Center>
-            <Center>
-                <QRCodeSVG size={160} value={data} />
-            </Center>
-            <Text m={2}>{data}</Text>
-        </Box>
+        <Card width="260px" height="444px">
+            <CardHeader>
+                <Heading size='md'>{title}</Heading>
+            </CardHeader>
+            <CardBody>
+                <Stack divider={<StackDivider />} spacing='4'>
+                    <Box>
+                        <Heading size='xs'>QRCode</Heading>
+                        <Center pt='2'>
+                            <QRCodeSVG size={160} value={data} />
+                        </Center>
+                    </Box>
+                    <Box>
+                        <Heading size='xs'>Account</Heading>
+                        <Text pt='2' fontSize='sm'>{data}</Text>
+                    </Box>
+                </Stack>
+            </CardBody>
+        </Card>
     );
 }
 
@@ -31,14 +41,16 @@ type AvatarCardProps = {
 }
 export const AvatarCard = ({did, avatar}: AvatarCardProps) => {
     return (
-        <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-            <Center mt={6}>
-                <Avatar size='2xl' name={did} src={avatar} />
-            </Center>
-            <Center>
-                <Text fontWeight="bold" m={2}>{did}</Text>
-            </Center>
-        </Box>
+        <Card>
+            <CardHeader>
+                <Heading size='md'>{did}</Heading>
+            </CardHeader>
+            <CardBody>
+                <Center>
+                    <Avatar size='2xl' name={did} src={avatar} />
+                </Center>
+            </CardBody>
+        </Card>
     );
 }
 
@@ -49,76 +61,13 @@ type SnapshotCardProps = {
     getRefreshURI: () => string;
     updateCids: (data: CIDs) => any;
 }
-// export const SnapshotCard = () => {
-//     const [canRefresh, setCanRefresh] = React.useState(!ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10);
-//     const [refreshing, setRefreshing] = React.useState(false);
-//     const toast = useToast();
-    
-//     const arweave = `https://arweave.net/${ViewMdoelBridge.Cids.arweave}`;
-//     const ipfs = `https://${ViewMdoelBridge.Cids.ipfs}.ipfs.4everland.io/`;
-//     const refreshCids = async () => {
-//         try{
-//             setRefreshing(true);
-//             const res1 = await axios.get(APIs.RefreshCIDsOfDNA + "?eth=" + ViewData.eth);
-//             const data1 = res1.data;
-//             //console.log(data1);
-//             if(data1 && data1.success === true){
-//                 toast({
-//                     title: 'Refresh CIDs...',
-//                     description: "Success!",
-//                     status: 'success',
-//                     duration: 2000,
-//                     isClosable: true,
-//                 });
-//                 ViewMdoelBridge.Cids = data1.cids;
-//                 setCanRefresh(false);
-//             }
-//             else{
-//                 toast({
-//                     title: 'Refresh CIDs...',
-//                     description: "Failed!",
-//                     status: 'error',
-//                     duration: 3000,
-//                     isClosable: true,
-//                 });
-//             }
-//         }
-//         finally{
-//             setRefreshing(false);
-//         }
-//     };
-//     return (
-//         <WrapItem padding="10px">
-//             <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-//                 <Center>
-//                     <Text fontWeight="bold" m={2}>CIDs</Text>
-//                 </Center>
-//                 <Center mt={2}>
-//                     <Link target="_blank" href={arweave}>Arweave <ExternalLinkIcon mx='2px' /></Link>
-//                 </Center>
-//                 <Center mt={2}>
-//                     <Link target="_blank" href={ipfs}>IPFS <ExternalLinkIcon mx='2px' /></Link>
-//                 </Center>
-//                 <Center mt={2} visibility={canRefresh ? "visible" : "hidden"}>
-//                     <IconButton icon={<RepeatIcon />} onClick={refreshCids}
-//                         isLoading={refreshing} aria-label="Refreshing" />
-//                 </Center>
-//                 <Center visibility={canRefresh ? "visible" : "hidden"}>
-//                     <Text color="gray" m={2}>If you see a <Text as="mark">Refresh</Text> button, click to fetch the newest Arweave hash.</Text>
-//                 </Center>
-//             </Box>
-//         </WrapItem>
-//     );
-// }
 export const SnapshotCard = ({title, cids, shouldRefresh, getRefreshURI, updateCids}: SnapshotCardProps) => {
     const [canRefresh, setCanRefresh] = React.useState(shouldRefresh());
     const [refreshing, setRefreshing] = React.useState(false);
     const [arweave, setArweave] = React.useState(`https://arweave.net/${cids.arweave}`);
     const [ipfs, setIpfs] = React.useState(`https://${cids.ipfs}.ipfs.4everland.io/`);
     const toast = useToast();
-    
-    //const arweave = `https://arweave.net/${cids.arweave}`;
-    //const ipfs = `https://${cids.ipfs}.ipfs.4everland.io/`;
+
     const refreshCids = async () => {
         try{
             setRefreshing(true);
@@ -154,24 +103,31 @@ export const SnapshotCard = ({title, cids, shouldRefresh, getRefreshURI, updateC
     };
     return (
         <WrapItem padding="10px">
-            <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                <Center>
-                    <Text fontWeight="bold" m={2}>{title}</Text>
-                </Center>
-                <Center mt={2}>
-                    <Link target="_blank" href={arweave}>Arweave <ExternalLinkIcon mx='2px' /></Link>
-                </Center>
-                <Center mt={2}>
-                    <Link target="_blank" href={ipfs}>IPFS <ExternalLinkIcon mx='2px' /></Link>
-                </Center>
-                <Center mt={2} visibility={canRefresh ? "visible" : "hidden"}>
+            <Card width="310px" height="300px">
+                <CardHeader>
+                    <Heading size='md'>{title}</Heading>
+                </CardHeader>
+                <CardBody>
+                    <Stack divider={<StackDivider />} spacing='4'>
+                        {canRefresh ? null : <Box>
+                            <Heading size='xs'>Arweave</Heading>
+                            <Link pt='2' fontSize='sm' target="_blank" href={arweave}>Link <ExternalLinkIcon mx='2px' /></Link>
+                        </Box>}
+                        {canRefresh ? null : <Box>
+                            <Heading size='xs'>IPFS</Heading>
+                            <Link pt='2' fontSize='sm' target="_blank" href={ipfs}>IPFS <ExternalLinkIcon mx='2px' /></Link>
+                        </Box>}
+                        {canRefresh ? <Box>
+                            <Heading size='xs'>⚠ Action Needed! ⚠</Heading>
+                            <Text pt='2' fontSize='sm'>If you see a <Text as="mark">Refresh</Text> button, click to fetch the newest Arweave hash.</Text>
+                        </Box> : null}
+                    </Stack>
+                </CardBody>
+                {canRefresh ? <CardFooter>
                     <IconButton icon={<RepeatIcon />} onClick={refreshCids}
                         isLoading={refreshing} aria-label="Refreshing" />
-                </Center>
-                <Center visibility={canRefresh ? "visible" : "hidden"}>
-                    <Text color="gray" m={2}>If you see a <Text as="mark">Refresh</Text> button, click to fetch the newest Arweave hash.</Text>
-                </Center>
-            </Box>
+                </CardFooter> : null}
+            </Card>
         </WrapItem>
     );
 }
@@ -184,6 +140,22 @@ export const AccountInfo = () => {
             </WrapItem>
         );
     };
+    
+    return (
+        <Wrap p={10} spacing="20px">
+            {renderCrypto("EVM | ETH", ViewMdoelBridge.DNA.genes.crypto.eth || ViewData.eth)}
+            {ViewMdoelBridge.DNA.genes.crypto.ar ? renderCrypto("Arweave", ViewMdoelBridge.DNA.genes.crypto.ar) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.atom ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.atom) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.dot ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.dot) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.sol ? renderCrypto("Solana", ViewMdoelBridge.DNA.genes.crypto.sol) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.algo ? renderCrypto("Algorand", ViewMdoelBridge.DNA.genes.crypto.algo) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.idena ? renderCrypto("Idena", ViewMdoelBridge.DNA.genes.crypto.idena) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.btc ? renderCrypto("Bitcoin", ViewMdoelBridge.DNA.genes.crypto.btc) : null}
+            {ViewMdoelBridge.DNA.genes.crypto.ckb ? renderCrypto("Nervos", ViewMdoelBridge.DNA.genes.crypto.ckb) : null}
+        </Wrap>
+    );
+}
+export const DIDAvatarsCards = () => {
     const renderDotbit = () => {
         const did = ViewMdoelBridge.DNA.genes.dotbit;
         if(did && did.length > 4){
@@ -208,23 +180,56 @@ export const AccountInfo = () => {
     }
 
     return (
-        <Wrap spacing="20px">
+        <Wrap p={10} spacing="20px">
             {renderDotbit()}
             {renderENS()}
-            {renderCrypto("EVM | ETH", ViewMdoelBridge.DNA.genes.crypto.eth || ViewData.eth)}
-            {ViewMdoelBridge.DNA.genes.crypto.ar ? renderCrypto("Arweave", ViewMdoelBridge.DNA.genes.crypto.ar) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.atom ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.atom) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.dot ? renderCrypto("Cosmos", ViewMdoelBridge.DNA.genes.crypto.dot) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.sol ? renderCrypto("Solana", ViewMdoelBridge.DNA.genes.crypto.sol) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.algo ? renderCrypto("Algorand", ViewMdoelBridge.DNA.genes.crypto.algo) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.idena ? renderCrypto("Idena", ViewMdoelBridge.DNA.genes.crypto.idena) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.btc ? renderCrypto("Bitcoin", ViewMdoelBridge.DNA.genes.crypto.btc) : null}
-            {ViewMdoelBridge.DNA.genes.crypto.ckb ? renderCrypto("Nervos", ViewMdoelBridge.DNA.genes.crypto.ckb) : null}
-            <SnapshotCard title="DNA Snapshot" cids={ViewMdoelBridge.Cids}
+        </Wrap>
+    );
+}
+
+export const SnapshotsCards = () => {
+    // return (
+    //     <Accordion>
+    //         <AccordionItem>
+    //             <h2>
+    //                 <AccordionButton>
+    //                     <Box flex='1' textAlign='left'>Snapshots</Box>
+    //                     <AccordionIcon />
+    //                 </AccordionButton>
+    //             </h2>
+    //             <AccordionPanel>
+    //                 <Wrap p={2} spacing="20px">
+    //                     <SnapshotCard title="DNA" cids={ViewMdoelBridge.Cids}
+    //                         shouldRefresh={() => !ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10 }
+    //                         getRefreshURI={() => APIs.RefreshCIDsOfDNA + "?eth=" + ViewData.eth}
+    //                         updateCids={(newCids: CIDs) => { ViewMdoelBridge.Cids = newCids; }}/>
+    //                     {ViewMdoelBridge.LastDataSnapshot.createdAt > 999 ? <SnapshotCard title="Cyber Mark (Data)"
+    //                         cids={ViewMdoelBridge.LastDataSnapshot.cids}
+    //                         shouldRefresh={() => !ViewMdoelBridge.LastDataSnapshot.cids.arweave || ViewMdoelBridge.LastDataSnapshot.cids.arweave.length < 10 }
+    //                         getRefreshURI={() => APIs.RefreshCIDsOfCyberMark + "?dna=" + ViewMdoelBridge.DNA.hash}
+    //                         updateCids={(newCids: CIDs) => { ViewMdoelBridge.LastDataSnapshot.cids = newCids; }}/> : null}
+    //                     {/* <WrapItem padding="10px">
+    //                         <Card width="200px" height="300px">
+    //                             <CardHeader>
+    //                                 <Heading size='md'>Epoch</Heading>
+    //                             </CardHeader>
+    //                             <CardBody>
+    //                                 <Heading size="4xl">Apps</Heading>
+    //                             </CardBody>
+    //                         </Card>
+    //                     </WrapItem> */}
+    //                 </Wrap>
+    //             </AccordionPanel>
+    //         </AccordionItem>
+    //     </Accordion>
+    // );
+    return (
+        <Wrap p={2} spacing="20px">
+            <SnapshotCard title="DNA" cids={ViewMdoelBridge.Cids}
                 shouldRefresh={() => !ViewMdoelBridge.Cids.arweave || ViewMdoelBridge.Cids.arweave.length < 10 }
                 getRefreshURI={() => APIs.RefreshCIDsOfDNA + "?eth=" + ViewData.eth}
                 updateCids={(newCids: CIDs) => { ViewMdoelBridge.Cids = newCids; }}/>
-            {ViewMdoelBridge.LastDataSnapshot.createdAt > 999 ? <SnapshotCard title="Cyber Mark (Data Snapshot)"
+            {ViewMdoelBridge.LastDataSnapshot.createdAt > 999 ? <SnapshotCard title="Cyber Mark (Data)"
                 cids={ViewMdoelBridge.LastDataSnapshot.cids}
                 shouldRefresh={() => !ViewMdoelBridge.LastDataSnapshot.cids.arweave || ViewMdoelBridge.LastDataSnapshot.cids.arweave.length < 10 }
                 getRefreshURI={() => APIs.RefreshCIDsOfCyberMark + "?dna=" + ViewMdoelBridge.DNA.hash}
