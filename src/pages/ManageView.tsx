@@ -72,11 +72,160 @@ export const ManageView = () => {
     const uriIdenaWeb = AuthAPIs.getLinkUri_Idena_Web(Utility.generatePlainUUID(), ViewMdoelBridge.DNA.hash);
     //const cxtCeramic: CeramicContext = ViewData.ceramicContext;
 
-    const namespace = "runebox";
+    const processCache = async (data: any) => {
+        if (data && data.success === true) {
+            if(data.existsUnfinished === true){
+                toast({
+                    title: 'There is a unfinished mutation!',
+                    description: "Trying to reload...",
+                    status: 'info',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                if(data.tasks && data.tasks.length > 0){
+                    setSigners(old => data.tasks);
+                    setAddedAccounts(old => data.addedAccounts);
+                    setDeletedAccounts(old => data.removedAccounts);
+                    setNewMutisigThreshold(old => data.recombinationThreshold);
+                }
+                // else{
+                //     toast({
+                //         title: 'Error!',
+                //         description: "Failed to reload the unfinished mutation...",
+                //         status: 'error',
+                //         duration: 5000,
+                //         isClosable: true,
+                //     });
+                // }
+            }
+        }
+        else {
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            setNextStepDisabled(false);
+        }
+    }
+    // const tryLoadCache = async () => {
+    //     const message = WalletUtility.buildSignContent_MutateDNA(ViewMdoelBridge.DNA.hash, item.key, item.account, addedAccounts, deletedAccounts, signers, newMutisigThreshold);
+    //     switch (item.key) {
+    //         case AccountKeys.ETH:
+    //             await WalletUtility.connectEth(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.ETH),
+    //                 async (data: any) => {
+    //                     await processSignResult(data);
+    //                 },
+    //                 () => {
+    //                 },
+    //                 () => {
+    //                 },
+    //                 toast);
+    //             break;
+    //         case AccountKeys.Arweave:
+    //             await WalletUtility.connectArweave(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Arweave),
+    //                 async (data: any) => {
+    //                     await processSignResult(data);
+    //                 },
+    //                 () => {
+    //                 },
+    //                 () => {
+    //                 },
+    //                 toast);
+    //             break;
+    //         case AccountKeys.Atom:
+    //             await WalletUtility.connectCosmos(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Atom),
+    //                 async (data: any) => {
+    //                     await processSignResult(data);
+    //                 },
+    //                 () => {
+    //                 },
+    //                 () => {
+    //                 },
+    //                 toast);
+    //             break;
+    //         case AccountKeys.Solana:
+    //             await WalletUtility.connectSolana(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Solana),
+    //                 async (data: any) => {
+    //                     await processSignResult(data);
+    //                 },
+    //                 () => {
+    //                 },
+    //                 () => {
+    //                 },
+    //                 toast);
+    //             break;
+    //         case AccountKeys.Algorand:
+    //             await WalletUtility.connectAlgo(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Algorand),
+    //                 async (data: any) => {
+    //                     await processSignResult(data);
+    //                 },
+    //                 () => {
+    //                 },
+    //                 () => {
+    //                 },
+    //                 toast);
+    //             break;
+    //         // case AccountKeys.Idena:
+    //         //     break;
+    //         // case AccountKeys.Bitcoin:
+    //         //     callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.Bitcoin), item);
+    //         //     break;
+    //         // case AccountKeys.NervosCKB:
+    //         //     callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB), item);
+    //         //     break;
+    //     }
+    // }
     const checkCache = async () => {
-        //TODO
-
-        setNextStepDisabled(false);
+        const uri = APIs.getUri_CheckBeforeMutation(AccountKeys.ETH, ViewData.eth);
+        const res = await axios.get(uri);
+        const data = res.data;
+        if (data && data.success === true) {
+            // if(data.existsUnfinished === true){
+            //     toast({
+            //         title: 'There is a unfinished mutation!',
+            //         description: "Trying to reload...",
+            //         status: 'info',
+            //         duration: 3000,
+            //         isClosable: true,
+            //     });
+            //     if(data.tasks && data.tasks.length > 0){
+            //         setSigners(old => data.tasks);
+            //         setAddedAccounts(old => data.addedAccounts);
+            //         setDeletedAccounts(old => data.removedAccounts);
+            //         setNewMutisigThreshold(old => data.recombinationThreshold);
+            //     }
+            // }
+            // if(data.passed === true && activeStep === 0){
+            //     nextStep();
+            // }
+        }
+        else {
+            // 1. need refresh CIDs
+            if(data.needRefreshCids === true){
+                toast({
+                    title: 'Attention!',
+                    description: data.error,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                await delay(2000);
+                navigate(RoutesData.Nav);
+                return;
+            }
+            // 2. unknown error
+            toast({
+                title: 'Error!',
+                description: data.error,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            //setNextStepDisabled(true);
+        }
     }
     const getMultisigThreshold = async () => {
         if(currentMutisigThreshold > 0)

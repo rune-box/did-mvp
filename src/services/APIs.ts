@@ -27,6 +27,9 @@ export const APIs = {
     getUri_Link: (dna: string, key: string) => {
         return `/dna/link/${dna}/${key}`;
     },
+    getUri_CheckBeforeMutation: (key: string, account: string ) => {
+        return `/dna/check-before-mutation/${key}/${account}`;
+    },
     getUri_GetRecombinationThreshold: (dna: string) => {
         return `/dna/get-recombination-threshold/${dna}`;
     },
