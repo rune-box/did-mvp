@@ -1,5 +1,5 @@
 import { AddIcon, ArrowBackIcon, ArrowForwardIcon, ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloseIcon, DeleteIcon, LinkIcon, RepeatIcon } from "@chakra-ui/icons";
-import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Alert, AlertDescription, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertIcon, AlertTitle, Box, Button, ButtonGroup, Center, Divider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Grid, GridItem, Heading, HStack, IconButton, Input, InputGroup, InputLeftAddon, InputLeftElement, InputRightElement, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Select, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { Accordion, AccordionButton, AccordionItem, AccordionPanel, Alert, AlertDescription, AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, AlertIcon, AlertTitle, Box, Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Center, Divider, Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerFooter, DrawerHeader, DrawerOverlay, Flex, Grid, GridItem, Heading, HStack, IconButton, Input, InputGroup, InputLeftAddon, InputLeftElement, InputRightElement, List, ListItem, Menu, MenuButton, MenuItem, MenuList, Select, Spacer, Tab, TabList, TabPanel, TabPanels, Tabs, Text, Textarea, useDisclosure, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import axios from "axios";
 import { Step, Steps, useSteps } from "chakra-ui-steps";
 //import { githubAuthorize, githubVerify, twitterAuthorize, twitterVerify } from "@cyberlab/social-verifier";
@@ -708,21 +708,21 @@ export const ManageView = () => {
 
     const renderDeleteWrapItem = (title: string, key: string, account: string) => {
         return (
-            <WrapItem padding="10px">
-                <Box w='200px' h='200px' borderWidth='1px' borderRadius='lg' shadow="lg">
-                    <Heading as='h3' size='lg' color='gray.500' m={2}>{title}</Heading>
-                    <Divider />
-                    <Text height="50px" m={5}>{account}</Text>
-                    <Divider />
-                    <HStack as='h4' m={1} spacing={3}>
+            <WrapItem padding="10px" key={key}>
+                <Card width="230px">
+                    <CardHeader fontWeight="bold">{title}</CardHeader>
+                    <CardBody>
+                        <Text>{account}</Text>
+                    </CardBody>
+                    <CardFooter>
                         <IconButton size='sm' icon={<DeleteIcon />} colorScheme='red' isRound={true}
                             isDisabled={ViewData.keyOfPrimaryAccount === key || deletedAccounts.length > 0}
                             onClick={(e) => {
                                 setDeletingKey(key);
                                 onDeleteAlertOpen();
                             }} aria-label={"Delete"}></IconButton>
-                    </HStack>
-                </Box>
+                    </CardFooter>
+                </Card>
             </WrapItem>
         );
     }
@@ -899,7 +899,7 @@ export const ManageView = () => {
             <Flex flexDir="column" width="100%">
                 <Steps activeStep={activeStep}>
                     <Step label="Check Unfinished Records">
-                        //Check
+                        //TODO
                     </Step>
 
                     <Step label="Remove">
