@@ -17,6 +17,9 @@ export const ViewData = {
     btc: "",
     ckb: "",
     algo: "",
+    // 3rd
+    unipassid: "",
+    // did
     did: {
         dotbit: "",
         ens: ""
@@ -51,6 +54,7 @@ export const EmptyDNA = {
             ckb: "",
             algo: ""
         },
+        unipassid: "",
         social: {
             twitter: "",
             github: ""
@@ -159,6 +163,7 @@ export class ViewMdoelBridge {
       ViewData.btc = ViewMdoelBridge.DNA.genes.crypto.btc;
       ViewData.ckb = ViewMdoelBridge.DNA.genes.crypto.ckb;
       ViewData.algo = ViewMdoelBridge.DNA.genes.crypto.algo;
+      ViewData.unipassid = ViewMdoelBridge.DNA.genes.unipassid;
 
       await ViewMdoelBridge.DotbitContext.useAddress(ViewData.eth);
       ViewData.did = {

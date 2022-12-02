@@ -36,19 +36,28 @@ export const QrcodeCard = ({data, title}: QrcodeCardProps) => {
 }
 
 type AvatarCardProps = {
+    title: string;
     did: string;
     avatar: string;
 }
-export const AvatarCard = ({did, avatar}: AvatarCardProps) => {
+export const AvatarCard = ({title, did, avatar}: AvatarCardProps) => {
     return (
         <Card>
             <CardHeader>
-                <Heading size='md'>{did}</Heading>
+                <Heading size='md'>{title}</Heading>
             </CardHeader>
             <CardBody>
-                <Center>
-                    <Avatar size='2xl' name={did} src={avatar} />
-                </Center>
+                <Stack divider={<StackDivider />} spacing='4'>
+                    <Box>
+                        <Center>
+                        <Avatar size='2xl' name={did} src={avatar} />
+                    </Center>
+                    </Box>
+                    <Box>
+                        <Heading size='xs'>Account</Heading>
+                        <Text pt='2' fontSize='sm'>{did}</Text>
+                    </Box>
+                </Stack>
             </CardBody>
         </Card>
     );
@@ -162,7 +171,7 @@ export const DIDAvatarsCards = () => {
             const img = ViewMdoelBridge.DotbitContext.avatar;
             return (
                 <WrapItem padding="5px">
-                    <AvatarCard did={did} avatar={img} />
+                    <AvatarCard title=".bit" did={did} avatar={img} />
                 </WrapItem>
             );
         }
@@ -173,7 +182,7 @@ export const DIDAvatarsCards = () => {
             const img = `https://robohash.org/${did}.png?set=set1`;
             return (
                 <WrapItem padding="5px">
-                    <AvatarCard did={did} avatar={img} />
+                    <AvatarCard title="ENS" did={did} avatar={img} />
                 </WrapItem>
             );
         }
@@ -183,6 +192,9 @@ export const DIDAvatarsCards = () => {
         <Wrap p={10} spacing="20px">
             {renderDotbit()}
             {renderENS()}
+            {ViewData.unipassid ? <WrapItem>
+                <AvatarCard title="UniPassID" did={ViewData.unipassid} avatar={`https://robohash.org/${ViewData.unipassid}.png?set=set1`} />
+            </WrapItem> : null}
         </Wrap>
     );
 }

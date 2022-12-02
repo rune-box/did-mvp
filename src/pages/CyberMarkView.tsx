@@ -410,6 +410,19 @@ export const CyberMarkView = () => {
             // case AccountKeys.NervosCKB:
             //     callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB), item);
             //     break;
+            case AccountKeys.UniPassID:
+                await WalletUtility.connectUnipassId(message, WalletUtility.buildSignContent, APIs.getUri_Snapshot(ViewMdoelBridge.DNA.hash, AccountKeys.UniPassID),
+                    async (data: any) => {
+                        await processSignResult(data);
+                    },
+                    () => {
+                        item.working = false;
+                    },
+                    () => {
+                        item.working = false;
+                    },
+                    toast);
+                break;
         }
     }
 

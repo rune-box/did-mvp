@@ -9,4 +9,6 @@ export class AccountKeys{
     static readonly NervosCKB: string = "ckb";
     static readonly Idena: string = "idena";
     static readonly Algorand: string = "algo";
+
+    static readonly UniPassID: string = "unipassid";
 }

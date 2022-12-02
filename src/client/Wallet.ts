@@ -12,6 +12,11 @@ import MyAlgoConnect from "@randlabs/myalgo-connect";
 import { ViewData, ViewMdoelBridge } from "./ViewData";
 import { ImprintItem } from "../models/DataRune";
 import { DataRuneUtility } from "../utils/DataRuneUtility";
+import up, { UPAuthMessage } from "up-core-test";
+import functions from "up-ckb-alpha-test";
+import { NervosConfig } from "./NervosConfig";
+import PWCore from "@lay2/pw-core";
+import { delay } from "../utils/threads";
 
 export class WalletUtility {
     static buildSignContent (account: string): string {
@@ -509,6 +514,75 @@ export class WalletUtility {
         }
     }
 
+    static configCKB(){
+        PWCore.setChainId(NervosConfig.PWCore_ChainId);
+        functions.config({
+            upSnapshotUrl: NervosConfig.Unipass_SnapshotUrl,
+            chainID: NervosConfig.PWCore_ChainId,
+            ckbNodeUrl: NervosConfig.CKB_NodeUrl,
+            ckbIndexerUrl: NervosConfig.CKB_IndexerUrl,
+            upLockCodeHash: NervosConfig.Unipass_LockCodeHash
+        });
+    }
+    static async connectUnipassId(message: string, buildSignMessage: (account: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
+        toast: (data: any) => any){
+        try{
+            up.config({
+                domain: "app.unipass.id",
+                protocol: "https"
+            });
+            WalletUtility.configCKB();
+            const upAccount = await up.connect({
+                email: false,
+                evmKeys: true
+            });
+            await delay(777);
+            const msgContent = message || buildSignMessage(upAccount.username);
+            const upRes = await up.authorize(new UPAuthMessage('PLAIN_MSG', upAccount.username, msgContent));
+            if(!upRes){
+                toast({
+                    title: 'Error!',
+                    description: "Authorization failed!",
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+                return;
+            }
+            // const ckb = functions.getCKBAddress(upAccount.username);
+            // console.log("ckb.addressString: " + ckb.addressString);
+            const res = await axios.post(uri, {
+                message: msgContent,
+                signature: JSON.stringify(upRes)
+            });
+            const data = res.data;
+            if (data && data.success === true) {
+                if (connected) connected(data);
+            }
+            else {
+                toast({
+                    title: 'Error!',
+                    description: data.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+            }
+        } catch (err: any) {
+            toast({
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+
     static async checkAccount (uri: string, requestData: any,
         successed: (data: any) => any, failed: () => any,
         toast: (data: any) => any) {
@@ -574,6 +648,8 @@ export class WalletUtility {
                 return "Bitcoin";
             case AccountKeys.NervosCKB:
                 return "Nervos";
+            case AccountKeys.UniPassID:
+                return "UniPassID";
         }
     }
 }

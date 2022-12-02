@@ -38,7 +38,7 @@ import { AccountKeys } from "../client/Constants";
 import { RoutesData } from '../client/RoutesData';
 import { WalletUtility } from '../client/Wallet';
 import { APIs } from '../services/APIs';
-import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, DotIcon, EthIcon, SolIcon } from '../icons/Icons';
+import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, DotIcon, EthIcon, SolIcon, UnipassIcon } from '../icons/Icons';
 import { SignatureForm } from './SignatureForm';
 
 export const NavBar = () => {
@@ -52,6 +52,7 @@ export const NavBar = () => {
   const [currentDot, setCurrentDot] = React.useState(ViewData.dot);
   const [currentSol, setCurrentSol] = React.useState(ViewData.sol);
   const [currentAlgo, setCurrentAlgo] = React.useState(ViewData.algo);
+  const [currentUnipassId, setCurrentUnipassId] = React.useState(ViewData.unipassid);
   const [verifyUri, setVerifyUri] = React.useState("");
   const [accountActivated, setAccountActivated] = React.useState(ViewData.activated);
   const [displayName, setDisplayName] = React.useState(ViewData.displayName);
@@ -109,7 +110,7 @@ export const NavBar = () => {
   };
 
   const tryConnectETH = async () => {
-    await WalletUtility.connectEth("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_ETH,
+    await WalletUtility.connectEth("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.ETH),
       async (data: any) => {
         ViewData.ethSigner = data.signer;
         ViewData.eth = data.account;
@@ -130,7 +131,7 @@ export const NavBar = () => {
   };
 
   const tryConnectArweave = async () => {
-    await WalletUtility.connectArweave("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Arweave,
+    await WalletUtility.connectArweave("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.Arweave),
       async (data: any) => {
         ViewData.ar = data.account;
         setCurrentAr(data.account);
@@ -150,7 +151,7 @@ export const NavBar = () => {
   }
 
   const tryConnectCosmos = async () => {
-    await WalletUtility.connectCosmos("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Cosmos,
+    await WalletUtility.connectCosmos("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.Atom),
       async (data: any) => {
         ViewData.atom = data.account;
         setCurrentAtom(data.account);
@@ -170,7 +171,7 @@ export const NavBar = () => {
   }
 
   const tryConnectPolkadot = async () => {
-    await WalletUtility.connectPolkadot("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Polkadot,
+    await WalletUtility.connectPolkadot("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.Polkadot),
       async (data: any) => {
         ViewData.dot = data.account;
         setCurrentDot(data.account);
@@ -190,7 +191,7 @@ export const NavBar = () => {
   }
 
   const tryConnectSolana = async () => {
-    await WalletUtility.connectSolana("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_SOL,
+    await WalletUtility.connectSolana("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.Solana),
       async (data: any) => {
         ViewData.sol = data.account;
         setCurrentSol(data.account);
@@ -210,7 +211,7 @@ export const NavBar = () => {
   }
 
   const tryConnectAlgo = async () => {
-    await WalletUtility.connectAlgo("", WalletUtility.buildSignContent, APIs.AuthenticateWallet_Algo,
+    await WalletUtility.connectAlgo("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.Algorand),
       async (data: any) => {
         ViewData.algo = data.account;
         setCurrentSol(data.account);
@@ -222,6 +223,26 @@ export const NavBar = () => {
           isClosable: true,
         });
         ViewData.keyOfPrimaryAccount = AccountKeys.Algorand;
+        await processDNAData(data);
+      },
+      () => { },
+      () => { },
+      toast);
+  }
+
+  const tryConnectUnipassId = async () => {
+    await WalletUtility.connectUnipassId("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.UniPassID),
+      async (data: any) => {
+        ViewData.unipassid = data.account;
+        setCurrentUnipassId(data.account);
+        toast({
+          title: 'Connected!',
+          description: "Your UnipassID: " + ViewData.unipassid,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        ViewData.keyOfPrimaryAccount = AccountKeys.UniPassID;
         await processDNAData(data);
       },
       () => { },
@@ -311,9 +332,12 @@ export const NavBar = () => {
             {currentSol && currentSol.length > 40 ? null : <MenuItem icon={<SolIcon />} onClick={tryConnectSolana} isDisabled={WalletUtility.detectSolana() === false}>Solana</MenuItem>}
             {currentAlgo && currentAlgo.length > 40 ? null : <MenuItem icon={<AlgoIcon />} onClick={tryConnectAlgo}>Algorand</MenuItem>}
           </MenuGroup>
+          <MenuGroup title='3rd Services'>
+            {currentUnipassId && currentUnipassId.length > 1 ? null : <MenuItem icon={<UnipassIcon />} onClick={tryConnectUnipassId}>UnipassID</MenuItem>}
+          </MenuGroup>
           <MenuGroup title='Sign Message'>
-            <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_BTC); }} isDisabled={true}>Bitcoin</MenuItem>
-            <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.AuthenticateWallet_CKB); }}>Nervos CKB</MenuItem>
+            <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.getUri_AuthenticateWallet(AccountKeys.Bitcoin)); }} isDisabled={true}>Bitcoin</MenuItem>
+            <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.getUri_AuthenticateWallet(AccountKeys.NervosCKB)); }}>Nervos CKB</MenuItem>
           </MenuGroup>
         </MenuList>
       </Menu>

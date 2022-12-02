@@ -4,14 +4,14 @@ const APIPrefix_Runebox = AppSettings.APIPrefix;
 const queryPart = "&address=";
 
 export const APIs = {
-    AuthenticateWallet_Arweave: "/connect/wallet/ar",
-    AuthenticateWallet_ETH: "/connect/wallet/eth",
-    AuthenticateWallet_Cosmos: "/connect/wallet/atom",
-    AuthenticateWallet_Polkadot: "/connect/wallet/dot",
-    AuthenticateWallet_SOL: "/connect/wallet/sol",
-    AuthenticateWallet_BTC: "/connect/wallet/btc",
-    AuthenticateWallet_CKB: "/connect/wallet/ckb",
-    AuthenticateWallet_Algo: "/connect/wallet/algo",
+    // AuthenticateWallet_Arweave: "/connect/wallet/ar",
+    // AuthenticateWallet_ETH: "/connect/wallet/eth",
+    // AuthenticateWallet_Cosmos: "/connect/wallet/atom",
+    // AuthenticateWallet_Polkadot: "/connect/wallet/dot",
+    // AuthenticateWallet_SOL: "/connect/wallet/sol",
+    // AuthenticateWallet_BTC: "/connect/wallet/btc",
+    // AuthenticateWallet_CKB: "/connect/wallet/ckb",
+    // AuthenticateWallet_Algo: "/connect/wallet/algo",
     CheckIdena: "/connect/check-idena",
     CheckLinkIdena: "/dna/link/check-idena",
     ActivateEvm: "/dna/activate-evm",
@@ -21,6 +21,9 @@ export const APIs = {
     RefreshCIDsOfDNA: "/dna/refresh-cids-by-eth",
     RefreshCIDsOfCyberMark: "/cyber-mark/refresh-cids",
 
+    getUri_AuthenticateWallet: (key: string) => {
+        return `/connect/wallet/${key}`;
+    },
     getUri_AddLink: (dna: string, key: string) => {
         return `/dna/add/${dna}/${key}`;
     },

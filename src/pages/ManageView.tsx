@@ -16,7 +16,7 @@ import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { SignatureForm } from "../components/SignatureForm";
 import { SignersSection } from "../components/SignersSection";
-import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, EthIcon, IdenaIcon, SolIcon } from "../icons/Icons";
+import { AlgoIcon, ArIcon, AtomIcon, BtcIcon, CkbIcon, EthIcon, IdenaIcon, SolIcon, UnipassIcon } from "../icons/Icons";
 import { Account2, Account4 } from "../models/Account";
 import { SignActions } from "../models/Actions";
 import { APIs, AuthAPIs } from "../services/APIs";
@@ -33,6 +33,7 @@ export const ManageView = () => {
     const [idena, setIdena] = React.useState(ViewData.idena);
     const [btc, setBtc] = React.useState(ViewData.btc);
     const [ckb, setCkb] = React.useState(ViewData.ckb);
+    const [unipassid, setUnipassid] = React.useState(ViewData.unipassid);
     const [editingBtc, setEditingBtc] = React.useState("");
     const [deletingKey, setDeletingKey] = React.useState("");
     // new genes
@@ -322,6 +323,15 @@ export const ManageView = () => {
             () => { },
             toast);
     }
+    const linkUnipassID = async () => {
+        await WalletUtility.connectUnipassId("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.UniPassID),
+            async (data: any) => {
+                addAccount(AccountKeys.UniPassID, data.account);
+            },
+            () => { },
+            () => { },
+            toast);
+    }
     const linkBySignature = async (key: string, uri: string) => {
         if (!uri) {
             toast({
@@ -415,6 +425,10 @@ export const ManageView = () => {
                 item.account = ckb;
                 setCkb("");
                 break;
+            case AccountKeys.UniPassID:
+                item.account = unipassid;
+                setUnipassid("");
+                break;
         }
         setDeletedAccounts([...deletedAccounts, item]);
         setSigners(signers.filter(i => i.key !== item.key || i.account !== item.account));
@@ -446,6 +460,9 @@ export const ManageView = () => {
                 break;
             case AccountKeys.NervosCKB:
                 setCkb(item.account);
+                break;
+            case AccountKeys.UniPassID:
+                setUnipassid(item.account);
                 break;
         }
         setDeletedAccounts(deletedAccounts.filter(i => i.key !== item.key || i.account !== item.account));
@@ -603,6 +620,19 @@ export const ManageView = () => {
             case AccountKeys.NervosCKB:
                 callMultiSigSignature(APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB), item);
                 break;
+            case AccountKeys.UniPassID:
+                await WalletUtility.connectUnipassId(message, WalletUtility.buildSignContent, APIs.getUri_SignMutation(ViewMdoelBridge.DNA.hash, AccountKeys.UniPassID),
+                    async (data: any) => {
+                        await processSignResult(data);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    () => {
+                        setWorking(item, false, false);
+                    },
+                    toast);
+                break;
         }
     }
 
@@ -706,7 +736,8 @@ export const ManageView = () => {
     //     }
     // };
 
-    const renderDeleteWrapItem = (title: string, key: string, account: string) => {
+    const renderDeleteWrapItem = (key: string, account: string) => {
+        const title = WalletUtility.getTitleByAccountKey(key);
         return (
             <WrapItem padding="10px" key={key}>
                 <Card width="230px">
@@ -730,14 +761,15 @@ export const ManageView = () => {
     const renderCurrentGenesSection = () => {
         return (
             <Wrap spacing="20px">
-                {eth ? renderDeleteWrapItem("ETH | EVM", AccountKeys.ETH, eth) : null}
-                {ar ? renderDeleteWrapItem("Arweave", AccountKeys.Arweave, ar) : null}
-                {atom ? renderDeleteWrapItem("Cosmos", AccountKeys.Atom, atom) : null}
-                {sol ? renderDeleteWrapItem("Solana", AccountKeys.Solana, sol) : null}
-                {algo ? renderDeleteWrapItem("Algorand", AccountKeys.Algorand, algo) : null}
-                {btc ? renderDeleteWrapItem("Bitcoin", AccountKeys.Bitcoin, btc) : null}
-                {ckb ? renderDeleteWrapItem("Nervos", AccountKeys.NervosCKB, ckb) : null}
-                {idena ? renderDeleteWrapItem("Idena", AccountKeys.Idena, idena) : null}
+                {eth ? renderDeleteWrapItem(AccountKeys.ETH, eth) : null}
+                {ar ? renderDeleteWrapItem(AccountKeys.Arweave, ar) : null}
+                {atom ? renderDeleteWrapItem(AccountKeys.Atom, atom) : null}
+                {sol ? renderDeleteWrapItem(AccountKeys.Solana, sol) : null}
+                {algo ? renderDeleteWrapItem(AccountKeys.Algorand, algo) : null}
+                {btc ? renderDeleteWrapItem(AccountKeys.Bitcoin, btc) : null}
+                {ckb ? renderDeleteWrapItem(AccountKeys.NervosCKB, ckb) : null}
+                {idena ? renderDeleteWrapItem(AccountKeys.Idena, idena) : null}
+                {unipassid ? renderDeleteWrapItem(AccountKeys.UniPassID, unipassid) : null}
             </Wrap>
         );
     }
@@ -765,6 +797,8 @@ export const ManageView = () => {
                                     onClick={linkAlgorand}>Algorand</Button>}
                                 {ckb ? null : <Button leftIcon={<CkbIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.NervosCKB)}
                                     onClick={(e) => { linkBySignature(AccountKeys.NervosCKB, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB)); }}>Nervos</Button>}
+                                {unipassid ? null : <Button leftIcon={<UnipassIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.UniPassID)}
+                                    onClick={linkUnipassID}>UnipassID</Button>}
                             </HStack>
                             {idena ? null : <Box height="40px" bgColor="gray.50" padding={1}>
                                 <HStack marginLeft={1} marginRight={1} verticalAlign="middle">
