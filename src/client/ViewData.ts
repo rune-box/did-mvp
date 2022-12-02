@@ -97,7 +97,8 @@ export class ViewMdoelBridge {
 
     static getSigners = (skipSig: boolean = false) => {
         const signers = new Array<Account4>();
-        const crypto = ViewMdoelBridge.DNA.genes.crypto;
+        const genes = ViewMdoelBridge.DNA.genes;
+        const crypto = genes.crypto;
 
         const eth = ViewMdoelBridge.getAccount3(AccountKeys.ETH, crypto.eth);
         if(eth) signers.push(eth);
@@ -116,6 +117,9 @@ export class ViewMdoelBridge {
 
         const algo = ViewMdoelBridge.getAccount3(AccountKeys.Algorand, crypto.algo);
         if(algo) signers.push(algo);
+
+        const unipass = ViewMdoelBridge.getAccount3(AccountKeys.UniPassID, genes.unipassid);
+        if(unipass) signers.push(unipass);
 
         if(!skipSig){
             const btc = ViewMdoelBridge.getAccount3(AccountKeys.Bitcoin, crypto.btc);
@@ -149,6 +153,8 @@ export class ViewMdoelBridge {
                 return ViewMdoelBridge.DNA.genes.crypto.btc === account;
             case AccountKeys.NervosCKB:
                 return ViewMdoelBridge.DNA.genes.crypto.ckb === account;
+            case AccountKeys.UniPassID:
+                return ViewMdoelBridge.DNA.genes.unipassid === account;
         }
         return false;
     }
