@@ -69,15 +69,18 @@ export const CyberMarkView = () => {
                     const theTask = tasks.filter(i => i.rune.id === card.id)[0];
                     if(theTask){
                         theTask.data = card.data;
-                        theTask.finished = true;
-                        theTask.updatedAt = Utility.getTimestamp();
+                        theTask.updatedAt = card.updated;
                         theTask.isLoading = false;
-    
+                        theTask.finished = !card.failed;
+                        theTask.failed = card.failed;
                         processedTasks.push(theTask);
+                        if(!card.failed){
+                            count++;
+                        }
                     }
                 });
                 tasks = otherTasks.concat(processedTasks);
-                count += processedTasks.length;
+                //count += processedTasks.length;
             }
             else{
                 tasks = taskFailed(tasks, task);
@@ -140,7 +143,7 @@ export const CyberMarkView = () => {
     const processIdenaTasks = async (tasks: DataRuneTask[]) => {
         let count = 0;
         while(true){
-            const todoTasks = tasks.filter(i => i.finished === false);
+            const todoTasks = tasks.filter(i => i.finished === false && !i.failed);
             if(!todoTasks || todoTasks.length === 0)
                 break;
             const task = todoTasks[0];

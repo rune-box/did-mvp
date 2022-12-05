@@ -4,7 +4,8 @@ export class DataCard{
     //data: object = {};
     title: string = "";
     data: number | string | boolean = 0;
-    updated: string = "";
+    updated: number = 0;
+    failed: boolean = false;
 
     constructor(){}
 }
