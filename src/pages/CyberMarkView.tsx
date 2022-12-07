@@ -9,6 +9,7 @@ import { DIDKeys } from "../client/DIDBase";
 import { RoutesData } from "../client/RoutesData";
 import { ViewData, ViewMdoelBridge } from "../client/ViewData";
 import { WalletUtility } from "../client/Wallet";
+import { TaskCard } from "../components/cards/TaskCard";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
 import { SignersSection } from "../components/SignersSection";
@@ -28,6 +29,8 @@ export const CyberMarkView = () => {
     const [evmFinishedCount, setEvmFinishedCount] = React.useState(0);
     const [idenaTasks, setIdenaTasks] = React.useState(new Array<DataRuneTask>());
     const [idenaFinishedCount, setIdenaFinishedCount] = React.useState(0);
+    const [nervosTasks, setNervosTasks] = React.useState(new Array<DataRuneTask>());
+    const [nervosFinishedCount, setNervosFinishedCount] = React.useState(0);
     const [cacheHash, setCacheHash] = React.useState("");
     const [dataImprints, setDataImprints] = React.useState(new Array<ImprintItem>());
     //const [loadingRunes, setLoadingRunes] = React.useState(false);
@@ -35,14 +38,12 @@ export const CyberMarkView = () => {
     const toast = useToast();
     const navigate = useNavigate();
     let loadingRunes = false;
-    // let _evmTasks: DataRuneTask[] = [];
-    // let _idenaTasks: DataRuneTask[] = [];
 
     const doFetchWork = async(task: DataRuneTask, address: string): Promise<DataCard[]> => {
         if(!task)
             return new Array<DataCard>();
         let api = task.rune.apis[0].uri.replace("/get?rune", "/snapshot?rune");
-        api = api.replace("https://api.runebox.xyz/v0/", "https://localhost:7153/v0/"); // TEST
+        //api = api.replace("https://api.runebox.xyz/v0/", "https://localhost:7153/v0/"); // TEST
         const fetchURL = api + address;
         console.log(fetchURL);
         const result = await fetch(fetchURL, {method: "GET"})
@@ -157,8 +158,44 @@ export const CyberMarkView = () => {
         }
         return tasks;
     }
+    const refreshNervosTask = async (task: DataRuneTask) => {
+        task.isLoading = true;
 
-    const startTasks = async (_evmTasks: DataRuneTask[], _idenaTasks: DataRuneTask[]) => {
+        let count = 0;
+        let _nervosTasks: DataRuneTask[] = [];
+        setNervosTasks(arg => {
+            const tempTasks = arg.filter(i => i.rune.id !== task.rune.id);
+            _nervosTasks = [task, ...tempTasks];
+            return _nervosTasks;
+        });
+
+        count = _nervosTasks.filter(i => i.finished).length;
+        const tastResult = await processTask(_nervosTasks, task, ViewData.ckb, count);
+        setNervosTasks(arg => tastResult.tasks);
+        setNervosFinishedCount(arg => tastResult.count);
+    }
+    const processNervosTasks = async (tasks: DataRuneTask[]) => {
+        let count = 0;
+        while(true){
+            const todoTasks = tasks.filter(i => i.finished === false && !i.failed);
+            if(!todoTasks || todoTasks.length === 0)
+                break;
+            const task = todoTasks[0];
+            const tastResult = await processTask(tasks, task, ViewData.ckb, count);
+            setNervosTasks(arg => tastResult.tasks);
+
+            count = tastResult.count;
+            setNervosFinishedCount(arg => count);
+
+            await delay(500);
+        }
+        return tasks;
+    }
+
+
+    const startTasks = async (_evmTasks: DataRuneTask[],
+        _idenaTasks: DataRuneTask[],
+        _nervosTasks: DataRuneTask[]) => {
         let imprints: Array<ImprintItem> = [];
 
         _evmTasks = await processEvmTasks(_evmTasks);
@@ -173,25 +210,18 @@ export const CyberMarkView = () => {
 
         if(ViewData.idena && ViewData.idena.length > 10){
             _idenaTasks = await processIdenaTasks(_idenaTasks);
-            // const idenaImprints = DataRuneUtility.getData0(_idenaTasks);
-            // if(idenaImprints && idenaImprints.length > 0){
-            //     // imprints.push({
-            //     //     address: ViewData.idena,
-            //     //     imprints: idenaImprints
-            //     // });
-            //     imprints = imprints.concat(idenaImprints);
-            // }
         }
-
-        // console.log("Imprints:");
-        // console.log(imprints);
+        if(ViewData.ckb && ViewData.ckb.length > 10){
+            _nervosTasks = await processNervosTasks(_nervosTasks);
+        }
     }
 
     const loadRunes = async () => {
         let _evmTasks = new Array<DataRuneTask>();
         let _idenaTasks = new Array<DataRuneTask>();
+        let _nervosTasks = new Array<DataRuneTask>();
         if(loadingRunes)
-            return {_evmTasks, _idenaTasks};
+            return {_evmTasks, _idenaTasks, _nervosTasks};
         //setLoadingRunes(true);
         loadingRunes = true;
 
@@ -217,6 +247,13 @@ export const CyberMarkView = () => {
                     _idenaTasks = _idenaTasks.concat(tasks);
                     setIdenaTasks(arg => _idenaTasks);
                 }
+                // nervos
+                const nervosRunes = runes.filter(i => i.accountType === DIDKeys.CKB_SLIP0044);
+                if(nervosRunes && nervosRunes.length > 0 && ViewData.ckb){
+                    const tasks = DataRuneUtility.convertToTasks(nervosRunes);
+                    _nervosTasks = _nervosTasks.concat(tasks);
+                    setNervosTasks(arg => _nervosTasks);
+                }
                 // exit?
                 if(runes.length < ViewData.countOfPerPage) break;
                 await delay(1000);
@@ -232,7 +269,7 @@ export const CyberMarkView = () => {
                 });
             }
         } // while
-        return {_evmTasks, _idenaTasks};
+        return {_evmTasks, _idenaTasks, _nervosTasks};
     }
 
     const prepare = async () => {
@@ -263,7 +300,7 @@ export const CyberMarkView = () => {
             // start fetching tasks
             setStartTime(st => now);
             const runes = await loadRunes();
-            await startTasks(runes._evmTasks, runes._idenaTasks);
+            await startTasks(runes._evmTasks, runes._idenaTasks, runes._nervosTasks);
         }
     }
     const processSignResult = async (data: any) => {
@@ -293,7 +330,8 @@ export const CyberMarkView = () => {
         // TODO: check
         if (item.done || item.working) return;
         // check 1
-        if (evmFinishedCount < evmTasks.length || idenaFinishedCount < idenaTasks.length) {
+        if (evmFinishedCount < evmTasks.length || idenaFinishedCount < idenaTasks.length ||
+            nervosFinishedCount < nervosTasks.length) {
             toast({
                 title: 'Please wait...',
                 description: "There is some data not fetched.",
@@ -463,28 +501,7 @@ export const CyberMarkView = () => {
             <Wrap spacing='30px' justify='center'>
                 {evmTasks.map((item: DataRuneTask, index: number) => (
                     <WrapItem key={index}>
-                        <Card>
-                            <CardHeader>
-                                <Heading size='md'>{item.rune.title}</Heading>
-                            </CardHeader>
-                            <CardBody>
-                                <Stack divider={<StackDivider />} spacing='4'>
-                                    <Box>
-                                        <Heading size='xs' textTransform='uppercase'>description</Heading>
-                                        <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
-                                    </Box>
-                                    <Divider m={3}/>
-                                    {item.finished ? <Box>
-                                        <Heading size='xs' textTransform='uppercase'>data</Heading>
-                                        <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
-                                    </Box> : null}
-                                </Stack>
-                            </CardBody>
-                            <CardFooter>
-                                <Button isLoading={item.isLoading} isDisabled={item.finished} leftIcon={<RepeatIcon/>}
-                                    onClick={(e) => { refreshEvmTask(item) }}>Refresh</Button>
-                            </CardFooter>
-                        </Card>
+                        <TaskCard item={item} refreshTask={refreshEvmTask} />
                     </WrapItem>
                 ))}
             </Wrap>
@@ -492,28 +509,15 @@ export const CyberMarkView = () => {
             {ViewData.idena ? <Wrap>
                 {idenaTasks.map((item: DataRuneTask, index: number) => (
                     <WrapItem key={index}>
-                        <Card>
-                            <CardHeader>
-                                <Heading size='md'>{item.rune.title}</Heading>
-                            </CardHeader>
-                            <CardBody>
-                                <Stack divider={<StackDivider />} spacing='4'>
-                                    <Box>
-                                        <Heading size='xs' textTransform='uppercase'>description</Heading>
-                                        <Text pt='2' fontSize='sm'>{item.rune.description}</Text>
-                                    </Box>
-                                    <Divider m={3}/>
-                                    {item.finished ? <Box>
-                                        <Heading size='xs' textTransform='uppercase'>data</Heading>
-                                        <Text pt='2' fontSize='sm'>{typeof item.data === "boolean" ? (item.data ? "YES" : "NO") : item.data}</Text>
-                                    </Box> : null}
-                                </Stack>
-                            </CardBody>
-                            <CardFooter>
-                                <Button isLoading={item.isLoading} isDisabled={item.finished} leftIcon={<RepeatIcon/>}
-                                    onClick={(e) => { refreshIdenaTask(item) }}>Refresh</Button>
-                            </CardFooter>
-                        </Card>
+                        <TaskCard item={item} refreshTask={refreshIdenaTask} />
+                    </WrapItem>
+                ))}
+            </Wrap> : null}
+            {ViewData.ckb ? <Heading>Nervos</Heading> : null}
+            {ViewData.ckb ? <Wrap>
+                {nervosTasks.map((item: DataRuneTask, index: number) => (
+                    <WrapItem key={index}>
+                        <TaskCard item={item} refreshTask={refreshNervosTask} />
                     </WrapItem>
                 ))}
             </Wrap> : null}
@@ -523,7 +527,9 @@ export const CyberMarkView = () => {
                     <Center>
                         <Heading>Create Cyber Mark (Data Snapshot)</Heading>
                     </Center>
-                    {evmFinishedCount === evmTasks.length && idenaFinishedCount === idenaTasks.length ?
+                    {evmFinishedCount === evmTasks.length &&
+                        idenaFinishedCount === idenaTasks.length &&
+                        nervosFinishedCount === nervosTasks.length ?
                         <SignersSection signers={signers} sign={sign} /> : null}
                 </VStack>
             </Center>

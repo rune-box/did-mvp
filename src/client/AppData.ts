@@ -1,6 +1,6 @@
 export const AppSettings = {
-    APIPrefix: "https://localhost:7153/v0/",
-    //APIPrefix: "https://api.runebox.xyz/v0/",
+    //APIPrefix: "https://localhost:7153/v0/",
+    APIPrefix: "https://api.runebox.xyz/v0/",
 }
 
 export class GlobalParam{
