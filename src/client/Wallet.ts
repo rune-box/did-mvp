@@ -28,6 +28,17 @@ export class WalletUtility {
         };
         return JSON.stringify(data);
     }
+    static buildSignContent2 (account: string, key: string, address: string): string {
+        //const nonce = getCookie(CookieKeys.EthSignInNonce);
+        const data = {
+            account: account,
+            key: key,
+            address: address,
+            message: "Connect to DNA@RuneBox!",
+            timestamp: Date.now()
+        };
+        return JSON.stringify(data);
+    }
 
     static buildSignContent_MutateDNA (dna: string, key: string, account: string,
         addedAccounts: Array<Account2>, removedAccounts: Array<Account2>, signers: Array<Account4>,
@@ -553,6 +564,73 @@ export class WalletUtility {
             }
             // const ckb = functions.getCKBAddress(upAccount.username);
             // console.log("ckb.addressString: " + ckb.addressString);
+            const res = await axios.post(uri, {
+                message: msgContent,
+                signature: JSON.stringify(upRes)
+            });
+            const data = res.data;
+            if (data && data.success === true) {
+                if (connected) connected(data);
+            }
+            else {
+                toast({
+                    title: 'Error!',
+                    description: data.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+            }
+        } catch (err: any) {
+            toast({
+                title: 'Error',
+                description: err.message || err,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+            if (failed) failed();
+        }
+    }
+    static async connectNervosUsingUnipassId(message: string, buildSignMessage: (account: string, key: string, address: string) => string, uri: string,
+        connected: (data: any) => any, failed: () => any, cancelled: () => any,
+        toast: (data: any) => any){
+        try{
+            up.config({
+                domain: "app.unipass.id",
+                protocol: "https"
+            });
+            WalletUtility.configCKB();
+            const upAccount = await up.connect({
+                email: false,
+                evmKeys: true
+            });
+            if(upAccount.username !== ViewData.unipassid){
+                toast({
+                    title: 'Attention!',
+                    description: "Please sitch to the account: " + ViewData.unipassid,
+                    status: 'info',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                return;
+            }
+            const ckb = functions.getCKBAddress(upAccount.username);
+            await delay(777);
+            const msgContent = message || buildSignMessage(upAccount.username, AccountKeys.NervosCKB, ckb.addressString);
+            const upRes = await up.authorize(new UPAuthMessage('PLAIN_MSG', upAccount.username, msgContent));
+            if(!upRes){
+                toast({
+                    title: 'Error!',
+                    description: "Authorization failed!",
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                if (failed) failed();
+                return;
+            }
             const res = await axios.post(uri, {
                 message: msgContent,
                 signature: JSON.stringify(upRes)

@@ -1,4 +1,5 @@
 import { AppSettings } from "../client/AppData";
+import { AccountKeys } from "../client/Constants";
 
 const APIPrefix_Runebox = AppSettings.APIPrefix;
 const queryPart = "&address=";
@@ -29,6 +30,9 @@ export const APIs = {
     },
     getUri_Link: (dna: string, key: string) => {
         return `/dna/link/${dna}/${key}`;
+    },
+    getUri_LinkByUnipassId: (dna: string, unipassid: string) => {
+        return `/dna/link/${dna}/${AccountKeys.UniPassID}:${unipassid}`;
     },
     getUri_CheckBeforeMutation: (key: string, account: string ) => {
         return `/dna/check-before-mutation/${key}/${account}`;

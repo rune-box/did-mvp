@@ -332,6 +332,15 @@ export const ManageView = () => {
             () => { },
             toast);
     }
+    const linkNervosByUnipassID = async () => {
+        await WalletUtility.connectNervosUsingUnipassId("", WalletUtility.buildSignContent2, APIs.getUri_LinkByUnipassId(ViewMdoelBridge.DNA.hash, ViewData.unipassid),
+            async (data: any) => {
+                addAccount(AccountKeys.NervosCKB, data.account);
+            },
+            () => { },
+            () => { },
+            toast);
+    }
     const linkBySignature = async (key: string, uri: string) => {
         if (!uri) {
             toast({
@@ -795,23 +804,33 @@ export const ManageView = () => {
                                     onClick={linkSolana}>Solana</Button>}
                                 {algo ? null : <Button leftIcon={<AlgoIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Algorand)}
                                     onClick={linkAlgorand}>Algorand</Button>}
-                                {ckb ? null : <Button leftIcon={<CkbIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.NervosCKB)}
-                                    onClick={(e) => { linkBySignature(AccountKeys.NervosCKB, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB)); }}>Nervos</Button>}
+                                {/* {ckb ? null : <Button leftIcon={<CkbIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.NervosCKB)}
+                                    onClick={(e) => { linkBySignature(AccountKeys.NervosCKB, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB)); }}>Nervos</Button>} */}
+                                {ckb ? null : <Menu>
+                                        <MenuButton as={Button} size='md' aria-label="Nervos" title="Nervos" variant="outline" icon={<LinkIcon />}
+                                             isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.NervosCKB)}>Nervos</MenuButton>
+                                        <MenuList>
+                                            <MenuItem icon={<UnipassIcon />} as="button" isDisabled={unipassid === null || unipassid.length === 0}
+                                                onClick={linkNervosByUnipassID}>UniPassID</MenuItem>
+                                            <MenuItem icon={<LinkIcon />} as="button"
+                                                onClick={(e) => { linkBySignature(AccountKeys.NervosCKB, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.NervosCKB)); }}>Sign Message</MenuItem>
+                                        </MenuList>
+                                    </Menu>}
                                 {unipassid ? null : <Button leftIcon={<UnipassIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.UniPassID)}
                                     onClick={linkUnipassID}>UnipassID</Button>}
                             </HStack>
-                            {idena ? null : <Box height="40px" bgColor="gray.50" padding={1}>
+                            {idena ? null : <Box height="40px" bgColor="gray.50">
                                 <HStack marginLeft={1} marginRight={1} verticalAlign="middle">
                                     <Text fontWeight="bold">Idena: </Text>
                                     <Menu>
-                                        <MenuButton as={Button} size='sm' aria-label="Connect" title="Connect" variant="outline"
+                                        <MenuButton as={Button} size='md' aria-label="Connect" title="Connect" variant="outline"
                                             disabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)} icon={<LinkIcon />}>1. Link</MenuButton>
                                         <MenuList>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaDesktop} target="_blank">Desktop App</MenuItem>
                                             <MenuItem icon={<LinkIcon />} as="a" href={uriIdenaWeb} target="_blank">Web App</MenuItem>
                                         </MenuList>
                                     </Menu>
-                                    <Button size='sm' leftIcon={<RepeatIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)}
+                                    <Button size='md' leftIcon={<RepeatIcon />} isDisabled={ViewMdoelBridge.isInChangedItems(addedAccounts, deletedAccounts, AccountKeys.Idena)}
                                         isLoading={checkingIdena} onClick={checkIdena}>2. Check</Button>
                                 </HStack>
                             </Box>}
@@ -958,9 +977,9 @@ export const ManageView = () => {
                                             <List spacing={2}>
                                                 {deletedAccounts.map((item: any, index: number) => (
                                                     <ListItem key={index}>
-                                                        <HStack>
+                                                        <HStack width="100%">
                                                             {drawAccountIcon(item.key)}
-                                                            <Text>{item.account}</Text>
+                                                            <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
                                                             <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon />} colorScheme="cyan" isRound={true}
                                                                 onClick={() => { restoreAccount(item); }} />
                                                         </HStack>
@@ -1007,7 +1026,7 @@ export const ManageView = () => {
                                                     <ListItem key={index}>
                                                         <HStack>
                                                             {drawAccountIcon(item.key)}
-                                                            <Text>{item.account}</Text>
+                                                            <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
                                                             <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon />} colorScheme="red" isRound={true}
                                                                 onClick={() => { deleteFromAdded(item); }} />
                                                         </HStack>
