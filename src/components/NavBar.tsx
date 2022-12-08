@@ -337,7 +337,7 @@ export const NavBar = () => {
           </MenuGroup>
           <MenuGroup title='Sign Message'>
             <MenuItem icon={<BtcIcon/>} onClick={(e) => { connectBySignature(APIs.getUri_AuthenticateWallet(AccountKeys.Bitcoin)); }} isDisabled={true}>Bitcoin</MenuItem>
-            <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.getUri_AuthenticateWallet(AccountKeys.NervosCKB)); }}>Nervos CKB</MenuItem>
+            <MenuItem icon={<CkbIcon/>} onClick={(e) => { connectBySignature(APIs.getUri_AuthenticateWallet(AccountKeys.NervosCKB)); }}>Nervos</MenuItem>
           </MenuGroup>
         </MenuList>
       </Menu>

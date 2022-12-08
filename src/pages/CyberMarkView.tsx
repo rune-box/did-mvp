@@ -196,7 +196,7 @@ export const CyberMarkView = () => {
     const startTasks = async (_evmTasks: DataRuneTask[],
         _idenaTasks: DataRuneTask[],
         _nervosTasks: DataRuneTask[]) => {
-        let imprints: Array<ImprintItem> = [];
+        //let imprints: Array<ImprintItem> = [];
 
         _evmTasks = await processEvmTasks(_evmTasks);
         // const evmImprints = DataRuneUtility.getData0(_evmTasks);
@@ -357,7 +357,7 @@ export const CyberMarkView = () => {
         }
         setCacheHash(result.hash);
 
-        const imprints = DataRuneUtility.getData(evmTasks, idenaTasks);
+        const imprints = DataRuneUtility.getData(evmTasks, idenaTasks, nervosTasks);
         // check 2
         // const hash = DataRuneUtility.keccak256(imprints);
         // console.log("Client data hash: " + hash);
@@ -505,7 +505,7 @@ export const CyberMarkView = () => {
                     </WrapItem>
                 ))}
             </Wrap>
-            {ViewData.idena ? <Heading>Idena</Heading> : null}
+            {ViewData.idena ? <Heading>Idena ({idenaFinishedCount} / {idenaTasks.length})</Heading> : null}
             {ViewData.idena ? <Wrap>
                 {idenaTasks.map((item: DataRuneTask, index: number) => (
                     <WrapItem key={index}>
@@ -513,7 +513,7 @@ export const CyberMarkView = () => {
                     </WrapItem>
                 ))}
             </Wrap> : null}
-            {ViewData.ckb ? <Heading>Nervos</Heading> : null}
+            {ViewData.ckb ? <Heading>Nervos ({nervosFinishedCount} / {nervosTasks.length})</Heading> : null}
             {ViewData.ckb ? <Wrap>
                 {nervosTasks.map((item: DataRuneTask, index: number) => (
                     <WrapItem key={index}>

@@ -20,7 +20,8 @@ export class DataRuneUtility {
         });
         return imprints;
     }
-    static getData(evmTasks: Array<DataRuneTask>, idenaTasks: Array<DataRuneTask>){
+    static getData(evmTasks: Array<DataRuneTask>, idenaTasks: Array<DataRuneTask>,
+        nervosTasks: Array<DataRuneTask>){
         let imprints: Array<ImprintItem> = [];
         const evmData = this.getData0(evmTasks);
         if(evmData.length > 0)
@@ -29,6 +30,10 @@ export class DataRuneUtility {
         const idenaData = this.getData0(idenaTasks);
         if(idenaData.length > 0)
             imprints = imprints.concat(idenaData);
+        
+        const nervosData = this.getData0(nervosTasks);
+        if(nervosData.length > 0)
+            imprints = imprints.concat(nervosData);
 
         imprints = imprints.sort((a, b) => {
             return a.id.localeCompare(b.id, 'en', { sensitivity: 'base' });
