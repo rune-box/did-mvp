@@ -63,6 +63,17 @@ export const ActivateView = () => {
     const linkUnipassId = async () => {
         await WalletUtility.connectUnipassId("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.UniPassID),
             async (data: any) => {
+                if(data.dna && data.dna.id.length > 7){
+                    toast({
+                        title: 'Error',
+                        description: "This UnipassID has been linked to another DNA!",
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+
                 ViewData.unipassid = data.account;
                 setUniPassId(data.account);
                 setHoldUniPassId(old => true);

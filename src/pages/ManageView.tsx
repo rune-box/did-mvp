@@ -326,6 +326,17 @@ export const ManageView = () => {
     const linkUnipassID = async () => {
         await WalletUtility.connectUnipassId("", WalletUtility.buildSignContent, APIs.getUri_Link(ViewMdoelBridge.DNA.hash, AccountKeys.UniPassID),
             async (data: any) => {
+                if(data.dna && data.dna.id.length > 7){
+                    toast({
+                        title: 'Error',
+                        description: "This UnipassID has been linked to another DNA!",
+                        status: 'error',
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                    return;
+                }
+                
                 addAccount(AccountKeys.UniPassID, data.account);
             },
             () => { },
