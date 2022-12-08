@@ -4,7 +4,10 @@ import axios from "axios";
 import { ethers } from "ethers";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import functions from "up-ckb-alpha-test";
+import up from "up-core-test";
 import { ActivationsRules_DAOSquare, ActivationsRules_Debank, ActivationsRules_Goodghosting } from "../client/ActivationsRules";
+import { AccountKeys } from "../client/Constants";
 import { DIDUtility } from "../client/DIDBase";
 import { RoutesData } from "../client/RoutesData";
 import { RunesData } from "../client/RunesData";
@@ -12,6 +15,7 @@ import { EmptyDNA, ViewData, ViewMdoelBridge } from "../client/ViewData";
 import { WalletUtility } from "../client/Wallet";
 import { Footer } from "../components/Footer";
 import { NavBar } from "../components/NavBar";
+import { UnipassIcon } from "../icons/Icons";
 import { APIs, AuthAPIs } from "../services/APIs";
 import { ComputeScoreDirectly } from "../utils/ScoreUtility";
 import { delay } from "../utils/threads";
@@ -27,7 +31,11 @@ export const ActivateView = () => {
     const [holdDid, setHoldDid] = React.useState(holdDotbit || holdENS);
     const [holdDids, setHoldDids] = React.useState(holdDotbit && holdENS);
     const [holdSameDids, setHoldSameDids] = React.useState( DIDUtility.isSame(ViewData.did.dotbit, ViewData.did.ens) );
+    const [holdSameDidsUp, setHoldSameDidsUp] = React.useState(false);
     const [holdBAB, setHoldBAB] = React.useState(false);
+    const [holdUniPassId, setHoldUniPassId] = React.useState(false);
+    const [uniPassId, setUniPassId] = React.useState("");
+    const [holdGoldenRecord, setHoldGoldenRecord] = React.useState(false);
     const [checkingDAOSquare, setCheckingDAOSquare] = React.useState(false);
     const [daoSquareIsOK, setDaoSquareIsOK] = React.useState(false);
     const [checkingDebank, setCheckingDebank] = React.useState(false);
@@ -52,6 +60,37 @@ export const ActivateView = () => {
             <ListIcon as={LockIcon} color='gray' />
         );
     };
+    const linkUnipassId = async () => {
+        await WalletUtility.connectUnipassId("", WalletUtility.buildSignContent, APIs.getUri_AuthenticateWallet(AccountKeys.UniPassID),
+            async (data: any) => {
+                ViewData.unipassid = data.account;
+                setUniPassId(data.account);
+                setHoldUniPassId(old => true);
+                toast({
+                    title: 'Connected!',
+                    description: "Your UnipassID: " + ViewData.unipassid,
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                });
+                ViewMdoelBridge.DNA.genes.unipassid = data.account;
+                const same = DIDUtility.isSame2(data.account, ViewData.did.dotbit, ViewData.did.ens);
+                setHoldSameDidsUp(old => same);
+
+                const ckb = functions.getCKBAddress(data.account);
+                //ViewMdoelBridge.DNA.genes.crypto.ckb = ckb.addressString;
+                const res1 = await axios.get(`https://api.runebox.xyz/v0/chains/nervos/fetch-item?rune=fac7852297ca476db8ec91da68db3b16&address=${ckb.addressString}`);
+                const data1 = res1.data;
+                //console.log(data1);
+                if(data1 && data1.failed === false){
+                    const hold: boolean = data1.data;
+                    setHoldGoldenRecord(old => hold);
+                }
+            },
+            () => { },
+            () => { },
+            toast);
+    }
     const checkDAOSquare = async () => {
         try{
             setCheckingDAOSquare(true);
@@ -268,7 +307,7 @@ export const ActivateView = () => {
     }
 
     const checkEligibility = async () => {
-        if(!holdDid) {
+        if(!holdDid && !holdUniPassId) {
             toast({
                 title: 'NO DID!',
                 description: "You should register a DID (.bit/.eth) first...",
@@ -276,17 +315,21 @@ export const ActivateView = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            return;
+            return false;
         }
         if(holdSameDids){
             setIsEligible(true);
-            return;
+            return true;
+        }
+        if(holdSameDidsUp || (holdUniPassId && holdGoldenRecord)){
+            setIsEligible(true);
+            return true;
         }
 
         await checkDAOSquare();
         if(daoSquareIsOK){
             setIsEligible(true);
-            return;
+            return true;
         }
 
         // need bab
@@ -298,19 +341,19 @@ export const ActivateView = () => {
                 duration: 3000,
                 isClosable: true,
             });
-            return;
+            return false;
         }
 
         await checkDebank();
         if(debankIsOK) {
             setIsEligible(true);
-            return;
+            return true;
         }
         
         await checkGoodghosting();
         if(goodghostingIsOK) {
             setIsEligible(true);
-            return;
+            return true;
         }
     }
     
@@ -337,7 +380,7 @@ export const ActivateView = () => {
                     <Box w='280px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>Idena</Heading>
                         <Divider />
-                        <List padding={3} h='200px'>
+                        <List padding={2} h='200px'>
                             {/* <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold a DID (.eth or .bit)
@@ -365,7 +408,7 @@ export const ActivateView = () => {
                     <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>DID + DAOSquare</Heading>
                         <Divider />
-                        <List padding={3}>
+                        <List padding={2}>
                             <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold a DID (.eth or .bit)
@@ -382,7 +425,7 @@ export const ActivateView = () => {
                     <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>Same DIDs</Heading>
                         <Divider />
-                        <List padding={3}>
+                        <List padding={2}>
                             <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold DIDs (.eth AND .bit)
@@ -396,14 +439,49 @@ export const ActivateView = () => {
                                 Hold a BAB token
                             </ListItem> */}
                         </List>
-                        <CircularProgress isIndeterminate visibility={checkingDebank ? "visible" : "hidden"} />
+                    </Box>
+                </WrapItem>
+                <WrapItem padding="30px">
+                    <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
+                        <Heading as='h3' size='lg' color='gray.500' m={2}>UniPassID</Heading>
+                        <Divider />
+                        <List padding={2}>
+                            <ListItem>
+                                {renderCheckIcon(holdUniPassId)}
+                                Hold a UniPassId
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdDid)}
+                                Hold a DID (.eth OR .bit)
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdSameDidsUp)}
+                                .eth/bit == UniPassId
+                            </ListItem>
+                        </List>
+                        {/* <Text fontWeight="bold">Plus any one of the followings:</Text> */}
+                        <Text ml={2} fontWeight="bold">---- OR ----</Text>
+                        <List padding={2}>
+                            <ListItem>
+                                {renderCheckIcon(holdUniPassId)}
+                                Hold a UniPassId
+                            </ListItem>
+                            <ListItem>
+                                {renderCheckIcon(holdGoldenRecord)}
+                                Hold a DAS Golden Cell Gensis NFT
+                            </ListItem>
+                        </List>
+                        <Divider />
+                        <Button m={1} size='xs' leftIcon={<UnipassIcon/>} onClick={linkUnipassId}
+                            isDisabled={holdUniPassId}>Connect UniPassID</Button>
+                        <Text m={1} verticalAlign="middle">UniPassID: {uniPassId}</Text>
                     </Box>
                 </WrapItem>
                 <WrapItem padding="30px">
                     <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>DID + BAB + Debank</Heading>
                         <Divider />
-                        <List padding={3}>
+                        <List padding={2}>
                             <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold a DID (.eth or .bit)
@@ -424,7 +502,7 @@ export const ActivateView = () => {
                     <Box w='300px' h='300px' borderWidth='1px' borderRadius='lg' shadow="lg">
                         <Heading as='h3' size='lg' color='gray.500' m={2}>DID + BAB + Goodghosting</Heading>
                         <Divider />
-                        <List padding={3}>
+                        <List padding={2}>
                             <ListItem>
                                 {renderCheckIcon(holdDid)}
                                 Hold a DID (.eth or .bit)

@@ -8,7 +8,8 @@ import {
   TabList,
   Tab,
   TabPanels,
-  TabPanel
+  TabPanel,
+  Divider
 } from "@chakra-ui/react"
 import { CardsRenderer } from "../components/cards/CardsRenderer"
 import { ENSContext } from "../client/ENSContext"
@@ -37,6 +38,7 @@ export const ProfileView = () => {
           </TabPanel>
         </TabPanels>
       </Tabs>
+      <Divider/>
       <SnapshotsCards />
       <CardsRenderer evmAddress={ViewMdoelBridge.DNA.genes.crypto.eth} idenaAddress={ViewMdoelBridge.DNA.genes.crypto.idena} />
       <Footer />

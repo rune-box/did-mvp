@@ -26,4 +26,20 @@ export class DIDUtility {
         const subEns = ens.substring(0, indexEns);
         return (subDotbit.toLocaleLowerCase() === subEns.toLocaleLowerCase());
     }
+    static isSame2(unipassid: string, dotbit: string, ens: string){
+        if(!unipassid) return false;
+        if(dotbit){
+            const indexDotbit = dotbit.lastIndexOf(".bit");
+            const subDotbit = dotbit.substring(0, indexDotbit);
+            const check = (unipassid.toLocaleLowerCase() === subDotbit.toLocaleLowerCase());
+            if(check) return true;
+        }
+        if(ens){
+            const indexEns = ens.lastIndexOf(".eth");
+            const subEns = ens.substring(0, indexEns);
+            const check = (unipassid.toLocaleLowerCase() === subEns.toLocaleLowerCase());
+            if(check) return true;
+        }
+        return false;
+    }
 }
