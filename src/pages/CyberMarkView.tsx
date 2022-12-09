@@ -1,6 +1,7 @@
-import { RepeatIcon } from "@chakra-ui/icons";
-import { Box, Button, Card, CardBody, CardFooter, CardHeader, Center, Divider, Heading, LinkBox, LinkOverlay, Stack, StackDivider, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { ArrowBackIcon, ArrowForwardIcon, RepeatIcon } from "@chakra-ui/icons";
+import { Box, Button, Card, CardBody, CardFooter, CardHeader, Center, Divider, Flex, Heading, IconButton, LinkBox, LinkOverlay, Spacer, Stack, StackDivider, Text, useToast, VStack, Wrap, WrapItem } from "@chakra-ui/react";
 import axios from "axios";
+import { Step, Steps, useSteps } from "chakra-ui-steps";
 import React, { useEffect } from "react";
 import Countdown from "react-countdown";
 import { useNavigate } from "react-router-dom";
@@ -35,6 +36,10 @@ export const CyberMarkView = () => {
     const [dataImprints, setDataImprints] = React.useState(new Array<ImprintItem>());
     //const [loadingRunes, setLoadingRunes] = React.useState(false);
     const [allowedTime, setAllowedTime] = React.useState(-1);
+    const { nextStep, prevStep, reset, activeStep } = useSteps({
+        initialStep: 0,
+    });
+    const [nextStepDisabled, setNextStepDisabled] = React.useState(false);
     const toast = useToast();
     const navigate = useNavigate();
     let loadingRunes = false;
@@ -106,7 +111,9 @@ export const CyberMarkView = () => {
         count = _evmTasks.filter(i => i.finished).length;
         const tastResult = await processTask(_evmTasks, task, ViewData.eth, count);
         setEvmTasks(arg => tastResult.tasks);
-        setEvmFinishedCount(arg => tastResult.count);
+
+        count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
+        setEvmFinishedCount(arg => count);
     }
     const processEvmTasks = async (tasks: DataRuneTask[]) => {
         let count = 0;
@@ -118,7 +125,7 @@ export const CyberMarkView = () => {
             const tastResult = await processTask(tasks, task, ViewData.eth, count);
             setEvmTasks(arg => tastResult.tasks);
 
-            count = tastResult.count;
+            count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
             setEvmFinishedCount(arg => count);
 
             await delay(500);
@@ -139,7 +146,9 @@ export const CyberMarkView = () => {
         count = _idenaTasks.filter(i => i.finished).length;
         const tastResult = await processTask(_idenaTasks, task, ViewData.idena, count);
         setIdenaTasks(arg => tastResult.tasks);
-        setIdenaFinishedCount(arg => tastResult.count);
+
+        count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
+        setIdenaFinishedCount(arg => count);
     }
     const processIdenaTasks = async (tasks: DataRuneTask[]) => {
         let count = 0;
@@ -151,7 +160,7 @@ export const CyberMarkView = () => {
             const tastResult = await processTask(tasks, task, ViewData.idena, count);
             setIdenaTasks(arg => tastResult.tasks);
 
-            count = tastResult.count;
+            count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
             setIdenaFinishedCount(arg => count);
 
             await delay(500);
@@ -172,7 +181,9 @@ export const CyberMarkView = () => {
         count = _nervosTasks.filter(i => i.finished).length;
         const tastResult = await processTask(_nervosTasks, task, ViewData.ckb, count);
         setNervosTasks(arg => tastResult.tasks);
-        setNervosFinishedCount(arg => tastResult.count);
+
+        count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
+        setNervosFinishedCount(arg => count);
     }
     const processNervosTasks = async (tasks: DataRuneTask[]) => {
         let count = 0;
@@ -184,7 +195,7 @@ export const CyberMarkView = () => {
             const tastResult = await processTask(tasks, task, ViewData.ckb, count);
             setNervosTasks(arg => tastResult.tasks);
 
-            count = tastResult.count;
+            count = tastResult.tasks.filter(i => !i.failed && i.finished ).length;
             setNervosFinishedCount(arg => count);
 
             await delay(500);
@@ -497,42 +508,57 @@ export const CyberMarkView = () => {
     return ( allowedTime > 0 ? renderWaitingComponent() :
         <VStack spacing={4}>
             <NavBar />
-            <Heading>EVM ({evmFinishedCount} / {evmTasks.length})</Heading>
-            <Wrap spacing='30px' justify='center'>
-                {evmTasks.map((item: DataRuneTask, index: number) => (
-                    <WrapItem key={index}>
-                        <TaskCard item={item} refreshTask={refreshEvmTask} />
-                    </WrapItem>
-                ))}
-            </Wrap>
-            {ViewData.idena ? <Heading>Idena ({idenaFinishedCount} / {idenaTasks.length})</Heading> : null}
-            {ViewData.idena ? <Wrap>
-                {idenaTasks.map((item: DataRuneTask, index: number) => (
-                    <WrapItem key={index}>
-                        <TaskCard item={item} refreshTask={refreshIdenaTask} />
-                    </WrapItem>
-                ))}
-            </Wrap> : null}
-            {ViewData.ckb ? <Heading>Nervos ({nervosFinishedCount} / {nervosTasks.length})</Heading> : null}
-            {ViewData.ckb ? <Wrap>
-                {nervosTasks.map((item: DataRuneTask, index: number) => (
-                    <WrapItem key={index}>
-                        <TaskCard item={item} refreshTask={refreshNervosTask} />
-                    </WrapItem>
-                ))}
-            </Wrap> : null}
-            <Divider m={3} />
-            <Center>
-                <VStack spacing={5}>
-                    <Center>
-                        <Heading>Create Cyber Mark (Data Snapshot)</Heading>
-                    </Center>
-                    {evmFinishedCount === evmTasks.length &&
-                        idenaFinishedCount === idenaTasks.length &&
-                        nervosFinishedCount === nervosTasks.length ?
-                        <SignersSection signers={signers} sign={sign} /> : null}
-                </VStack>
-            </Center>
+            <Flex flexDir="column" width="100%">
+                <Steps activeStep={activeStep}>
+                    <Step label="Tasks">
+                        <VStack spacing={4}>
+                            <Heading>EVM ({evmFinishedCount} / {evmTasks.length})</Heading>
+                            <Wrap spacing='30px' justify='center'>
+                                {evmTasks.map((item: DataRuneTask, index: number) => (
+                                    <WrapItem key={index}>
+                                        <TaskCard item={item} refreshTask={refreshEvmTask} />
+                                    </WrapItem>
+                                ))}
+                            </Wrap>
+                            {ViewData.idena ? <Heading>Idena ({idenaFinishedCount} / {idenaTasks.length})</Heading> : null}
+                            {ViewData.idena ? <Wrap>
+                                {idenaTasks.map((item: DataRuneTask, index: number) => (
+                                    <WrapItem key={index}>
+                                        <TaskCard item={item} refreshTask={refreshIdenaTask} />
+                                    </WrapItem>
+                                ))}
+                            </Wrap> : null}
+                            {ViewData.ckb ? <Heading>Nervos ({nervosFinishedCount} / {nervosTasks.length})</Heading> : null}
+                            {ViewData.ckb ? <Wrap>
+                                {nervosTasks.map((item: DataRuneTask, index: number) => (
+                                    <WrapItem key={index}>
+                                        <TaskCard item={item} refreshTask={refreshNervosTask} />
+                                    </WrapItem>
+                                ))}
+                            </Wrap> : null}
+                        </VStack>
+                    </Step>
+                    <Step label="Snapshot">
+                        <Center>
+                            <VStack spacing={5}>
+                                <Center>
+                                    <Heading>Create Cyber Mark (Data Snapshot)</Heading>
+                                </Center>
+                                <SignersSection signers={signers} sign={sign} />
+                            </VStack>
+                        </Center>
+                    </Step>
+                </Steps>
+            </Flex>
+            <Flex justify="space-between">
+                <IconButton icon={<ArrowBackIcon />} aria-label={"Previous"} m={2} isRound={true} variant='outline'
+                    isDisabled={activeStep === 0} onClick={prevStep} />
+                <Spacer />
+                <IconButton icon={<ArrowForwardIcon />} aria-label={"Next"} m={2} isRound={true} variant='outline'
+                    isDisabled={activeStep === 1 || (activeStep === 0 && evmFinishedCount < evmTasks.length &&
+                        idenaFinishedCount < idenaTasks.length &&
+                        nervosFinishedCount < nervosTasks.length)} onClick={nextStep} />
+            </Flex>
             <Footer />
         </VStack>
     );
