@@ -930,20 +930,22 @@ export const ManageView = () => {
         const newCount = signers.length + addedAccounts.length - deletedAccounts.length;
         var items = [...Array(newCount)].map((item, index) => index + 1);
         return (
-            <VStack width="100%" height="500px" justify="center">
-                <Heading as='h4' size='md' m={2}>MultiSig Threshold</Heading>
-                <HStack>
-                    <Select w={24} variant='flushed' placeholder='&nbsp; NotSet' value={newMutisigThreshold}
-                        onChange={(e) => {
-                            const threshold = parseInt(e.target.value);
-                            setNewMutisigThreshold(threshold);
-                        }}>
-                        {items.map((item, index) => <option value={item}>{item}</option> )}
-                    </Select>
-                    <Text>out of {newCount} account(s)</Text>
-                </HStack>
-                <Text m={2}>Current policy is {currentMutisigThreshold} out of {signers.length}</Text>
-            </VStack>
+            <Center m={5} width="600px" height="300px" boxShadow='xl' p='6' rounded='md'>
+                <VStack justify="center">
+                    <Heading as='h4' size='md' m={2}>MultiSig Threshold</Heading>
+                    <HStack>
+                        <Select w={24} variant='flushed' placeholder='&nbsp; NotSet' value={newMutisigThreshold}
+                            onChange={(e) => {
+                                const threshold = parseInt(e.target.value);
+                                setNewMutisigThreshold(threshold);
+                            }}>
+                            {items.map((item, index) => <option value={item}>{item}</option> )}
+                        </Select>
+                        <Text>out of {newCount} account(s)</Text>
+                    </HStack>
+                    <Text m={2}>Current policy is {currentMutisigThreshold} out of {signers.length}</Text>
+                </VStack>
+            </Center>
         );
     }
 
@@ -966,99 +968,85 @@ export const ManageView = () => {
                         //TODO
                     </Step>
 
-                    <Step label="Remove">
-                        <Grid w="100%" minHeight="500px" templateColumns="repeat(2, 1fr)" gap={1}>
-                            <GridItem w="100%">
-                                <Tabs>
-                                    <TabList>
-                                        <Tab>Action: Remove</Tab>
-                                    </TabList>
-                                    <TabPanels>
-                                        <TabPanel>{renderCurrentGenesSection()}</TabPanel>
-                                    </TabPanels>
-                                </Tabs>
-                            </GridItem>
-                            <GridItem w="100%">
-                                <Tabs>
-                                    <TabList>
-                                        <Tab color="red">Removed Items</Tab>
-                                    </TabList>
-                                    <TabPanels>
-                                        <TabPanel>
-                                            <List spacing={2}>
-                                                {deletedAccounts.map((item: any, index: number) => (
-                                                    <ListItem key={index}>
-                                                        <HStack width="100%">
-                                                            {drawAccountIcon(item.key)}
-                                                            <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
-                                                            <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon />} colorScheme="cyan" isRound={true}
-                                                                onClick={() => { restoreAccount(item); }} />
-                                                        </HStack>
-                                                    </ListItem>
-                                                ))}
-                                            </List>
-                                        </TabPanel>
-                                    </TabPanels>
-                                </Tabs>
-                            </GridItem>
-                        </Grid>
-                        {true || deletedAccounts && deletedAccounts.length > 0 ? <Alert status='error'>
-                            <AlertIcon />
-                            <Box>
-                                <AlertTitle>Attention!</AlertTitle>
-                                <AlertDescription>
-                                    The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
-                                </AlertDescription>
-                            </Box>
-                        </Alert> : null}
-                    </Step>
-
-                    <Step label="Add">
-                        <Grid w="100%" minHeight="500px" templateColumns="repeat(2, 1fr)" gap={1}>
-                            <GridItem w="100%">
-                                <Tabs>
-                                    <TabList>
-                                        <Tab>Action: Add</Tab>
-                                    </TabList>
-                                    <TabPanels>
-                                        <TabPanel>{renderNewGenesSection()}</TabPanel>
-                                    </TabPanels>
-                                </Tabs>
-                            </GridItem>
-                            <GridItem w="100%">
-                                <Tabs>
-                                    <TabList>
-                                        <Tab color="blue.200">Added Items</Tab>
-                                    </TabList>
-                                    <TabPanels>
-                                        <TabPanel>
-                                            <List spacing={2}>
-                                                {addedAccounts.map((item: any, index: number) => (
-                                                    <ListItem key={index}>
-                                                        <HStack>
-                                                            {drawAccountIcon(item.key)}
-                                                            <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
-                                                            <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon />} colorScheme="red" isRound={true}
-                                                                onClick={() => { deleteFromAdded(item); }} />
-                                                        </HStack>
-                                                    </ListItem>
-                                                ))}
-                                            </List>
-                                        </TabPanel>
-                                    </TabPanels>
-                                </Tabs>
-                            </GridItem>
-                        </Grid>
+                    <Step label="Remove/Add">
+                        <Tabs width="100%" isFitted={true}>
+                            <TabList>
+                                <Tab>Remove</Tab>
+                                <Tab>Add</Tab>
+                            </TabList>
+                            <TabPanels>
+                                <TabPanel>
+                                    <VStack spacing={3}>
+                                        <Grid w="100%" minHeight="500px" templateColumns="repeat(2, 1fr)" gap={1}>
+                                            <GridItem w="100%">
+                                                <Box p='6'>
+                                                {renderCurrentGenesSection()}
+                                                </Box>
+                                            </GridItem>
+                                            <GridItem w="100%">
+                                                <Box p='6'>
+                                                    <List spacing={2}>
+                                                        {deletedAccounts.map((item: any, index: number) => (
+                                                            <ListItem key={index}>
+                                                                <HStack width="100%">
+                                                                    {drawAccountIcon(item.key)}
+                                                                    <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
+                                                                    <IconButton ml={4} size="sm" aria-label={"Restore"} icon={<RepeatIcon />} colorScheme="cyan" isRound={true}
+                                                                        onClick={() => { restoreAccount(item); }} />
+                                                                </HStack>
+                                                            </ListItem>
+                                                        ))}
+                                                    </List>
+                                                </Box>
+                                            </GridItem>
+                                        </Grid>
+                                        <Alert status='error'>
+                                            <AlertIcon />
+                                            <Box>
+                                                <AlertTitle>Attention!</AlertTitle>
+                                                <AlertDescription>
+                                                    The deleted account will be in CoolDown state (365 days), it CANNOT be used to activate or link a account in these days.
+                                                </AlertDescription>
+                                            </Box>
+                                        </Alert>
+                                    </VStack>
+                                </TabPanel>
+                                <TabPanel>
+                                    <Grid w="100%" minHeight="500px" templateColumns="repeat(2, 1fr)" gap={1}>
+                                        <GridItem w="100%">
+                                            <Box p='6'>
+                                            {renderNewGenesSection()}
+                                            </Box>
+                                        </GridItem>
+                                        <GridItem w="100%">
+                                            <Box p='6'>
+                                                <List spacing={2}>
+                                                    {addedAccounts.map((item: any, index: number) => (
+                                                        <ListItem key={index}>
+                                                            <HStack>
+                                                                {drawAccountIcon(item.key)}
+                                                                <Text textOverflow="ellipsis" maxWidth="400px">{item.account}</Text>
+                                                                <IconButton ml={4} size="sm" aria-label={"Remove"} icon={<DeleteIcon />} colorScheme="red" isRound={true}
+                                                                    onClick={() => { deleteFromAdded(item); }} />
+                                                            </HStack>
+                                                        </ListItem>
+                                                    ))}
+                                                </List>
+                                            </Box>
+                                        </GridItem>
+                                    </Grid>
+                                </TabPanel>
+                            </TabPanels>
+                        </Tabs>
                     </Step>
 
                     <Step label="Recombination">
+                        <VStack width="100%" height="500px" justify="center">
                         {renderMutisigThreshold()}
+                        </VStack>
                     </Step>
                     <Step label="Sign to Commit">
                         <VStack width="100%" height="500px" justify="center">
-                            {/* <Box width="100%" padding={5} bgColor="green.300">
-                                <Text as="h4" color="white" textAlign="center">⬇⬇⬇ Are you ready? Let's sign one-by-one! ⬇⬇⬇</Text>
-                            </Box> */}
                             <Alert status='info'>
                                 <AlertIcon />
                                 ⬇⬇⬇ Are you ready? Let's sign one-by-one! ⬇⬇⬇
@@ -1073,7 +1061,7 @@ export const ManageView = () => {
                     isDisabled={activeStep === 0} onClick={prevStep} />
                 <Spacer />
                 <IconButton icon={<ArrowForwardIcon />} aria-label={"Next"} m={2} isRound={true} variant='outline'
-                    isDisabled={activeStep === 4} onClick={nextStep} />
+                    isDisabled={activeStep === 3} onClick={nextStep} />
             </Flex>
             <Footer />
 
